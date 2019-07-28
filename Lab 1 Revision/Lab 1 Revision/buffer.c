@@ -33,26 +33,20 @@ typedef struct BufferStruct {
 // then copy the contents from the buffer passed as a parameter
 // into the new buffer and return it.
 //
-Buffer *copy_buffer(Buffer *buffer) {
-
-    // TODO: Implement me
-    // Functions you may need include:
-    //
-    // malloc (twice, one for the struct and one for the data)
-    // memset 
-
-    // Check these using man pages. e.g. 'man malloc'
-    //
-
-    // memset(vector->data, 0, sizeof(n));
-
-
-
+Buffer *copy_buffer(Buffer *buffer) 
+{
     Buffer *bufferCopy = (Buffer*) malloc(sizeof(Buffer));
 
-    bufferCopy->data = malloc(sizeof(buffer));
-    memset(bufferCopy->data, 0)
+    bufferCopy->size = buffer->size;
+    bufferCopy->data = malloc(buffer->size * sizeof(char));
+
+    for (int i = 0; i < buffer->size; i++) {
+        memset(&bufferCopy->data[i], buffer->data[i], sizeof(char));  
+    }
+
+    return bufferCopy;
 }
+
 
 // Example buffer with normal strings
 Buffer *example1() {
@@ -63,6 +57,7 @@ Buffer *example1() {
     return buffer;
 }
 
+
 // Example buffer storing 3 totally different strings in the same buffer (note the '\0')
 Buffer *example2() {
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
@@ -71,17 +66,16 @@ Buffer *example2() {
     return buffer;
 }
 
+
 //
 // Use fopen to create a file for writing
 // Then fwrite to write the buffer to a file
 //
-
 void write_buffer(const char *filename, Buffer *buffer) {
     FILE *file = fopen(filename, "w");
     fwrite(buffer->data, 1, buffer->size, file);
     fclose(file);
 }
-
 
 
 int main() {

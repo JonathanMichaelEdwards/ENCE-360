@@ -11,7 +11,7 @@
 
 
 #define NUM_THREADS 16
-#define N 10000
+#define N 1000 * 1000
 
 
 typedef struct {
@@ -26,11 +26,9 @@ typedef struct {
 
 void *run_summation(void *ptr)
 {
-    Worker *worker = (Worker*)ptr;
+    Worker *worker = (Worker*) ptr;
 
-    for (int i = 0; i < worker->n; ++i) {
-        //TODO: make this thread safe!!
-
+    for (int i = 0; i < worker->n; ++i) { 
         (*worker->total)++;
     }
 
@@ -41,7 +39,6 @@ void *run_summation(void *ptr)
 
 int main()
 {
-
     // Global variable for total summation so far
     float total = 0;
 
@@ -58,18 +55,17 @@ int main()
         worker->lock = &lock;
         worker->n = N;
 
-        //TODO: Make this run in a thread!
-        run_summation((void*)worker);
+        run_summation((void*)worker);  // No Thread
+        // pthread_create(&worker->thread, (const pthread_attr_t*) &lock, run_summation, (void *)worker);
     }
 
 
-    ////////////////////////////////
     // Wait for all the threads we created
-    // for(i = ...)
-      ////////////////////////////////
+    for(int i = 0; i < workers->n; i++) {
+        pthread_join(workers->thread, NULL);  // adding new thread
+    }
 
     printf("Final total: %f \n", total);
 
     return 0;
 }
-

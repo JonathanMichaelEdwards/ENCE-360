@@ -20,10 +20,10 @@ struct Link {
     int value;
 };
 
+
 //
 // Print all the values in a linked list structure
 //
-
 void print_list(struct Link *list) {
     for (struct Link *l = list; l != NULL; l = l->next) {
         printf("%d", l->value);
@@ -44,14 +44,13 @@ void print_list(struct Link *list) {
 //
 
 struct Link *append(int x, struct Link *head) {
-    struct Link *head_ = (struct Link*)malloc(sizeof(struct Link));
+    struct Link *head_ = (struct Link*) malloc(sizeof(struct Link));
+
     head_->next = head;
     head_->value = x;
 
     return head_;
 }
-
-
 
 
 
@@ -71,6 +70,7 @@ struct Link *reverse_list(struct Link *list) {
 
     return head;
 }
+
 
 //
 // Iteratively compute the fibonacci sequence and store the results
@@ -121,9 +121,17 @@ struct Link *fibonacci(int n) {
 // There's a question on the Quiz about this - so do this first!
 //
 
-// struct Link *map_list(...) {
-// TODO: Implement me!
-// }
+struct Link *map_list(struct Link *fib, int ((*square)(int)))
+{
+    struct Link *head = NULL;
+
+    while (fib != NULL) {
+        head = append(square(fib->value), head);
+        fib = fib->next;
+    }
+
+    return reverse_list(head);
+}
 
 
 
@@ -132,8 +140,13 @@ struct Link *fibonacci(int n) {
 // traverse the list.
 //
 //
-void free_list(struct Link *list) {
-    // TODO: Implement me
+void free_list(struct Link *list)
+ {
+    if (list == NULL)
+        return;
+
+    free_list(list->next);
+    free(list);
 }
 
 
@@ -148,11 +161,11 @@ int square(int x) {
 int main() {
 
     struct Link *fib = fibonacci(10);
-    //   struct Link *fib_sq = map_list(fib, square);  
+    struct Link *fib_sq = map_list(fib, square);  
 
-      // print out our list of fibonacci^2 (in reverse)
-      // 1, 1, 4, 9, 25, 64, 169, 441, 1156, 3025
-    //   print_list(fib_sq);
+    // print out our list of fibonacci^2 (in reverse)
+    // 1, 1, 4, 9, 25, 64, 169, 441, 1156, 3025
+    print_list(fib_sq);
     print_list(fib);
 
     free_list(fib_sq);

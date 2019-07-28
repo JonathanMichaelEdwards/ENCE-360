@@ -6,9 +6,11 @@
             "command": "/usr/bin/clang-4.0",
             "args": [
                 "-g",
+                "-Wall -lrt -lm -g --std=c99",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-lpthread"
             ],
             "options": {
                 "cwd": "/usr/bin"

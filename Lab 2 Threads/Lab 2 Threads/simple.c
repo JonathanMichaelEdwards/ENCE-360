@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+
+typedef struct {
+    float *total;
+    int n;
+
+    pthread_mutex_t *lock;
+    pthread_t thread;
+
+} Worker;
+
+
+void *secondThread(void *ptr) {
+    int i = 0;
+    while (i < 100000000000) i++;
+
+    return NULL;
+}
+
+
+int main(int argc, char const *argv[])
+{
+    pthread_t thread;
+
+    puts("First Thread 1.");
+
+    // int arg = 123;
+
+    Worker *worker = (Worker*)malloc(10);
+    pthread_create(&thread, NULL, secondThread, (void*)&worker);
+    pthread_join(thread, NULL);  // adding new thread
+
+    return EXIT_SUCCESS;
+}
