@@ -11,7 +11,7 @@
 
 
 #define NUM_THREADS 16
-#define N 1000 * 1000
+#define N 10000
 
 
 typedef struct {
@@ -48,22 +48,25 @@ int main()
 
     for (int i = 0; i < NUM_THREADS; ++i) {
         // What would be the problem declaring Worker w here?
-
         Worker *worker = &workers[i];
         worker->total = &total; // Pass the global total into each thread
 
         worker->lock = &lock;
         worker->n = N;
 
-        run_summation((void*)worker);  // No Thread
-        // pthread_create(&worker->thread, (const pthread_attr_t*) &lock, run_summation, (void *)worker);
+        // run_summation((void*)worker);  // No Thread
+        pthread_create(&worker->thread, (const pthread_attr_t*) &lock, run_summation, (void*) worker);
+        pthread_join(worker->thread, NULL);  // adding new thread
     }
 
 
     // Wait for all the threads we created
-    for(int i = 0; i < workers->n; i++) {
-        pthread_join(workers->thread, NULL);  // adding new thread
-    }
+    // for(int i = 0; i < NUM_THREADS; i++) {
+    //     Worker *worker = &workers[i];
+
+    //     pthread_join(worker->thread, NULL);  // adding new thread
+    // }
+    // pthread_join(workers->thread, NULL);  // adding new thread
 
     printf("Final total: %f \n", total);
 
