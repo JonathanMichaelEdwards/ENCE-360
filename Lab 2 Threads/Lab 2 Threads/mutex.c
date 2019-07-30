@@ -28,7 +28,9 @@ void *run_summation(void *ptr)
 {
     Worker *worker = (Worker*) ptr;
 
+
     for (int i = 0; i < worker->n; ++i) { 
+        
         (*worker->total)++;
     }
 
@@ -55,18 +57,20 @@ int main()
         worker->n = N;
 
         // run_summation((void*)worker);  // No Thread
-        pthread_create(&worker->thread, (const pthread_attr_t*) &lock, run_summation, (void*) worker);
-        pthread_join(worker->thread, NULL);  // adding new thread
+        pthread_create(&(worker[i].thread), NULL, &run_summation, (void*) worker);
+        puts("hi");
     }
 
 
-    // Wait for all the threads we created
-    // for(int i = 0; i < NUM_THREADS; i++) {
-    //     Worker *worker = &workers[i];
 
-    //     pthread_join(worker->thread, NULL);  // adding new thread
-    // }
-    // pthread_join(workers->thread, NULL);  // adding new thread
+    puts("joining");
+    // Wait for all the threads we created
+    for(int i = 0; i < NUM_THREADS; ++i) {
+        printf("%ld %d", workers[i].thread, i);
+        puts("joined?");
+        pthread_join(workers[i].thread, NULL);  // adding new thread
+        puts("yes");
+    }
 
     printf("Final total: %f \n", total);
 

@@ -15,7 +15,8 @@ typedef struct {
 
 void *secondThread(void *ptr) {
     int i = 0;
-    while (i < 100000000000) i++;
+    printf("%d\n", ptr);
+    while (i < 10000) i++;
 
     return NULL;
 }
@@ -30,7 +31,7 @@ int main(int argc, char const *argv[])
     // int arg = 123;
 
     Worker *worker = (Worker*)malloc(10);
-    pthread_create(&thread, NULL, secondThread, (void*)&worker);
+    pthread_create(&thread, NULL, secondThread, NULL);//(void*)&worker);
     pthread_join(thread, NULL);  // adding new thread
 
     return EXIT_SUCCESS;

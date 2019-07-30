@@ -8,9 +8,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+
 int global = 5;
 
-void* child(void* arg) {
+
+void *child(void *arg) 
+{
     int local = 10;
 
     global++;
@@ -21,9 +24,11 @@ void* child(void* arg) {
     pthread_exit(NULL);
 }
 
-int main() {
+
+int main() 
+{
     pthread_t  childPid;
-    int       local = 10;
+    int        local = 10;
 
     printf("[At start]  global: %d  local: %d\n", global, local);
 

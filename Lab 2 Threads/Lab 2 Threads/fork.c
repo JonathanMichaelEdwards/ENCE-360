@@ -32,7 +32,7 @@ int main() {
     else { /* Parent code */
         global--;
         local--;
-        /* waitpid(childPid, NULL, 0); */
+        waitpid(childPid, NULL, 0);  // By including this line we wait for the child process to die inorder to run the parent
         printf("[Parent] childPid: 0x%x  parent: 0x%x\n", childPid, getpid());
         printf("[Parent] global: %d  local: %d\n", global, local);
         sleep(2); /* Wait 2 seconds */

@@ -1,6 +1,6 @@
 CC = gcc 
 # CFLAGS =  -Wall -lrt -lm -O3 -funroll-loops
-CFLAGS =  -Wall -lrt -lm -g --std=c99 -lpthread # -pthread
+CFLAGS =  -Wall -lrt -lm -g --std=c99 -lpthread
 
 .PHONY: default all clean
 
@@ -13,6 +13,12 @@ all: default
 	$(CC) -c -o $@ $< $(CFLAGS) 
 
 simple: simple.c $(TEST_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+runThreads: runThreads.c $(TEST_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+lecture: lecture.c $(TEST_OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 fork: fork.c $(TEST_OBJ)
