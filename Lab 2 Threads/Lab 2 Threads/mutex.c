@@ -24,14 +24,15 @@ typedef struct {
 } Worker;
 
 
+
 void *run_summation(void *ptr)
 {
     Worker *worker = (Worker*) ptr;
 
-
     for (int i = 0; i < worker->n; ++i) { 
-        
+        pthread_mutex_lock(worker->lock);     // Locking
         (*worker->total)++;
+        pthread_mutex_unlock(worker->lock);  // Unlocking
     }
 
     return NULL;
@@ -47,29 +48,21 @@ int main()
     pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
     Worker workers[NUM_THREADS];
 
-
     for (int i = 0; i < NUM_THREADS; ++i) {
-        // What would be the problem declaring Worker w here?
         Worker *worker = &workers[i];
-        worker->total = &total; // Pass the global total into each thread
+        worker->total = &total;  // Pass the global total into each thread
 
         worker->lock = &lock;
         worker->n = N;
 
-        // run_summation((void*)worker);  // No Thread
-        pthread_create(&(worker[i].thread), NULL, &run_summation, (void*) worker);
-        puts("hi");
+        // run_summation((void*)worker);                                 // No Thread
+        pthread_create(&(worker->thread), NULL, run_summation, worker);  // Threaded
     }
 
 
-
-    puts("joining");
     // Wait for all the threads we created
-    for(int i = 0; i < NUM_THREADS; ++i) {
-        printf("%ld %d", workers[i].thread, i);
-        puts("joined?");
-        pthread_join(workers[i].thread, NULL);  // adding new thread
-        puts("yes");
+    for(int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(workers[i].thread, NULL);
     }
 
     printf("Final total: %f \n", total);

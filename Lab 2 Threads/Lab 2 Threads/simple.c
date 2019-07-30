@@ -16,7 +16,7 @@ typedef struct {
 void *secondThread(void *ptr) {
     int i = 0;
     printf("%d\n", ptr);
-    while (i < 10000) i++;
+    while (i < 100000000000) i++;
 
     return NULL;
 }
