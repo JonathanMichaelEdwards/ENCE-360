@@ -26,23 +26,23 @@ void runMe(int *arg)
 int run_threads(int n) 
 {
     pthread_t threads[n];
-    int sum;
     void *status = 0;
+    int arg[n];
+    int sum = 0;
 
     // Create the threads
     for (int i = 0; i < n; i++) {
-        int *thread = (int*)&threads[i];
-        pthread_create((pthread_t*)&thread, NULL, (void*)&runMe, (void*)&sum);
+        arg[i] = i;
+        pthread_create(&threads[i], NULL, (void*)&runMe, &arg[i]);
     }
 
     // Wait for threads to finish
     for (int i = 0; i < n; i++) {
-        puts("problem1");
-        pthread_join(threads[i], &status);  // problem confused
-        puts("problem2");
+        pthread_join(threads[i], &status);
+        sum += *((int*)status);
     }
 
-    return (int)*((int*)&status);
+    return sum;
 }
 
 
