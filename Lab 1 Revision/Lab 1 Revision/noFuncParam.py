@@ -4,6 +4,6 @@ def a(x):
 
 def b(func, x):
     a = 3
-    return func(x) + func(a)  # + a(1) # 'int' object is not callable
+    return func(x) + func(a)
 
 print(b(a, 2))
