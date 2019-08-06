@@ -35,6 +35,7 @@ int main(int argc, char const *argv[])
         printf("hello %s\n", argv[0]);
         // execl("/usr/bin/sort", "sort", "-k", "+8", NULL);
         execl("/usr/bin/head", "-l", NULL);
+        
         /* Note: The location of sort depends on your distribution.
          * Use 'which sort' to find the correct location */
         perror("The exec of sort failed");
