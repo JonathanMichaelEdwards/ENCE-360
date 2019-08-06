@@ -12,16 +12,15 @@
 
 int main(int argc, char const *argv[]) 
 {
-    char inbuf[BUFSIZ];
     int fd[2];
     pid_t childpid;
 
     pipe(fd);
-    if ((childpid = fork()) == 0) { /* Child code: Runs ls */
+    if ((childpid = fork()) == 0) { /* Child code: Runs */
         dup2(fd[INP], STDOUT_FILENO);
         close(fd[OUTP]);
         close(fd[INP]);
-        execl("/bin/ls", "ls", "-l", NULL);
+        execl("/usr/bin/sort", "sort", "-k", "+8", NULL);
         perror("The exec of ls failed");
     }
 
@@ -30,14 +29,9 @@ int main(int argc, char const *argv[])
         close(fd[OUTP]);
         close(fd[INP]);
 
-        
-
-        printf("hello %s\n", argv[0]);
-        // execl("/usr/bin/sort", "sort", "-k", "+8", NULL);
-        execl("/usr/bin/head", "-l", NULL);
-        
-        /* Note: The location of sort depends on your distribution.
-         * Use 'which sort' to find the correct location */
+        execl("/usr/bin/head", "-l", "-2", NULL);
+        // /* Note: The location of sort depends on your distribution.
+        //  * Use 'which sort' to find the correct location */
         perror("The exec of sort failed");
     }
 

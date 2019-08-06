@@ -16,6 +16,10 @@ void sighup(); /* routines child will call upon sigtrap */
 void sigint();
 void sigquit();
 void waitChild(int);
+void install_handler();
+
+
+int count = 0;
 
 
 
@@ -24,7 +28,7 @@ int main(int argc, const char * argv[]) {
     pid_t child_pid = 0;
     int child_status = 0;
 
-    signal(SIGCHLD, &waitChild); /*Register the signal handler - syntax */
+    // signal(SIGCHLD, &waitChild); /*Register the signal handler - syntax */
 
     /* fork a child process... */
     child_pid = fork();
@@ -36,15 +40,22 @@ int main(int argc, const char * argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    else if (child_pid == 0) { /* Child code */
+    else if (child_pid == 0) { /* Child code */  
+        signal(SIGQUIT, install_handler);
         signal(SIGHUP, sighup); /* set function calls */
         signal(SIGINT, sigint);
-        signal(SIGQUIT, sigquit);
+        // signal(SIGQUIT, sigquit);
+        signal(SIGQUIT, install_handler);
         for (; ; sleep(1)); /*loop forever*/
     }
 
     else { /* Parent code */
         printf("Parent processing starts\n");
+
+        // printf("\nPARENT: sending SIGQUIT\n\n");
+        // sleep(1);
+        // kill(child_pid, SIGQUIT);
+        // sleep(5);
 
         /* child_pid holds id of child */
         printf("\nPARENT: sending SIGHUP\n\n");
@@ -80,13 +91,28 @@ void sigint() {
 }
 
 
-void sigquit() {
-    printf("CHILD: My DADDY has Killed me!!!\n");
-    printf("CHILD: cleaning up...\n");
-    sleep(2);
+// void sigquit() {
+//     printf("CHILD: My DADDY has Killed me!!!\n");
+//     printf("CHILD: cleaning up...\n");
+//     sleep(2);
+//     exit(0);
+// }
+
+
+void sigquit()
+{
+    write(1, "SIGQUIT\n", 8);
     exit(0);
 }
 
+
+void install_handler() 
+{
+    while (1) {
+        if (count == 0) count++;
+        else if (count == 1) sigquit();
+    }
+}
 
 void waitChild(int sigNum)
 {

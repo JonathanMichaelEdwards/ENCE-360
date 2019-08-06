@@ -36,7 +36,6 @@ int main(int argc, char const *argv[])
     write(fd[WRITE], msg1, MSGSIZE); 
     write(fd[WRITE], msg2, MSGSIZE); 
     write(fd[WRITE], msg3, MSGSIZE); 
-    printf("%s\n",argv[0]);
 
     for (i = 0; i < 3; i++) { 
         /* read pipe */
