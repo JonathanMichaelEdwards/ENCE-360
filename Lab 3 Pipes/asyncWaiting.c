@@ -42,7 +42,7 @@ int main(int argc, const char * argv[]) {
         signal(SIGHUP, sighup); /* set function calls */
         signal(SIGINT, sigint);
         // signal(SIGQUIT, sigquit);
-        signal(SIGQUIT, install_handler);
+        install_handler();
         for (; ; sleep(1)); /*loop forever*/
     }
 
@@ -66,7 +66,7 @@ int main(int argc, const char * argv[]) {
         /* child_pid holds id of child */
         printf("\nMIDDLE\n\n");
         sleep(1); /* Give the child some time to set up its signal handlers */
-        kill(child_pid, SIGHUP);
+        kill(child_pid, SIGINT);
         sleep(3); /* pause for 3 secs */
 
         printf("\nPARENT: sending SIGQUIT\n\n");
@@ -101,18 +101,20 @@ void sigint() {
 // }
 
 
-void install_handler() 
+void sigQuit()
 {
-    int child_status = 0;
-
-    signal(SIGQUIT, install_handler);  // listener
-    // wait(&count);
-
     write(1, "SIGQUIT\n", 8);
 
     if (count == 0) count++;
     else if (count == 1) exit(0);
 }
+
+
+void install_handler() 
+{
+    signal(SIGQUIT, sigQuit);  // listener
+}
+
 
 
 void waitChild(int sigNum)
