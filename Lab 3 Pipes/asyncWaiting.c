@@ -21,8 +21,6 @@ void install_handler();
 
 int count = 0;
 
-
-
 int main(int argc, const char * argv[]) {
     /* storage place for the pid of the child process, and its exit status. */
     pid_t child_pid = 0;
@@ -41,7 +39,6 @@ int main(int argc, const char * argv[]) {
     }
 
     else if (child_pid == 0) { /* Child code */  
-        signal(SIGQUIT, install_handler);
         signal(SIGHUP, sighup); /* set function calls */
         signal(SIGINT, sigint);
         // signal(SIGQUIT, sigquit);
@@ -51,11 +48,6 @@ int main(int argc, const char * argv[]) {
 
     else { /* Parent code */
         printf("Parent processing starts\n");
-
-        // printf("\nPARENT: sending SIGQUIT\n\n");
-        // sleep(1);
-        // kill(child_pid, SIGQUIT);
-        // sleep(5);
 
         /* child_pid holds id of child */
         printf("\nPARENT: sending SIGHUP\n\n");
@@ -67,6 +59,16 @@ int main(int argc, const char * argv[]) {
         kill(child_pid, SIGINT);
         sleep(3); /* pause for 3 secs */
         
+        printf("\nPARENT: sending SIGQUIT\n\n");
+        kill(child_pid, SIGQUIT);
+        // wait(&child_status);
+
+        /* child_pid holds id of child */
+        printf("\nMIDDLE\n\n");
+        sleep(1); /* Give the child some time to set up its signal handlers */
+        kill(child_pid, SIGHUP);
+        sleep(3); /* pause for 3 secs */
+
         printf("\nPARENT: sending SIGQUIT\n\n");
         kill(child_pid, SIGQUIT);
         wait(&child_status);
@@ -99,23 +101,23 @@ void sigint() {
 // }
 
 
-void sigquit()
-{
-    write(1, "SIGQUIT\n", 8);
-    exit(0);
-}
-
-
 void install_handler() 
 {
-    while (1) {
-        if (count == 0) count++;
-        else if (count == 1) sigquit();
-    }
+    int child_status = 0;
+
+    signal(SIGQUIT, install_handler);  // listener
+    // wait(&count);
+
+    write(1, "SIGQUIT\n", 8);
+
+    if (count == 0) count++;
+    else if (count == 1) exit(0);
 }
+
 
 void waitChild(int sigNum)
 {
     puts("sending SIGCHLD\n");
     wait(&sigNum);
+    sleep(1);
 }

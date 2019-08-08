@@ -27,7 +27,7 @@ char *msg3 = "hello, world #3";
 int main(int argc, char const *argv[])
 { 
     char *inbuf = malloc(sizeof(char) * MSGSIZE); 
-    int fd[2], i; 
+    int fd[2]; //, i; 
   
     if (pipe(fd) < 0)   // If pipe is less the 0, then fail
         exit(1); 
@@ -37,11 +37,11 @@ int main(int argc, char const *argv[])
     write(fd[WRITE], msg2, MSGSIZE); 
     write(fd[WRITE], msg3, MSGSIZE); 
 
-    for (i = 0; i < 3; i++) { 
-        /* read pipe */
-        read(fd[READ], (void*)inbuf, MSGSIZE); 
-        printf("%s\n", inbuf); 
-    } 
+    // for (i = 0; i < 3; i++) { 
+    //     /* read pipe */
+    //     read(fd[READ], (void*)inbuf, MSGSIZE); 
+    //     printf("%s\n", inbuf); 
+    // } 
     free(inbuf);
 
     return EXIT_SUCCESS; 
