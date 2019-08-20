@@ -41,7 +41,7 @@ Buffer *copy_buffer(Buffer *buffer)
     bufferCopy->data = malloc(buffer->size * sizeof(char));
 
     for (int i = 0; i < buffer->size; i++) {
-        memset(&bufferCopy->data[i], buffer->data[i], sizeof(char));  
+        memset(&bufferCopy->data[i], buffer->data[i], sizeof(char)); 
     }
 
     return bufferCopy;

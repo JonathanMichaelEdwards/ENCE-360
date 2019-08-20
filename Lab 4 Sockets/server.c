@@ -5,18 +5,19 @@
 #include <errno.h>
 #include <unistd.h>
 
+
 #define MAXDATASIZE 1024 // max buffer size 
 #define SERVER_PORT 2000
 
+
 int listen_on(int port)
 {
-
-    int s = socket(AF_INET, SOCK_STREAM, 0);
+    int s = socket(AF_INET, SOCK_STREAM, 0);           // Create socket
 
     struct sockaddr_in sa;
     sa.sin_family = AF_INET;          /* communicate using internet address */
-    sa.sin_addr.s_addr = INADDR_ANY; /* accept all calls                   */
-    sa.sin_port = htons(port); /* this is port number                */
+    sa.sin_addr.s_addr = INADDR_ANY;  /* accept all calls                   */
+    sa.sin_port = htons(port);        /* this is port number                */
 
     int rc = bind(s, (struct sockaddr *)&sa, sizeof(sa)); /* bind address to socket   */
     if (rc == -1) { // Check for errors
@@ -29,49 +30,57 @@ int listen_on(int port)
         perror("listen");
         exit(1);
     }
+    
 
     return s;
 }
 
 
-int accept_connection(int s) {
+int accept_connection(int s)
+{
+    struct sockaddr_in addrClient;
 
-
-    /////////////////////////////////////////////
-    // TODO: Implement in terms of 'accept'
-
-    /////////////////////////////////////////////  
-
-    return 0; // DELETE THIS !!
+    socklen_t len = sizeof(struct sockaddr_in);  // address length of client
+    return accept(s, (struct sockaddr*)&addrClient, &len);
 }
 
 
-void handle_request(int msgsock) {
-    ///////////////////
-
-      // This initial code reads a single message (and ignores it!)
+void handle_request(int msgsock)
+ {
+    // This initial code reads a single message (and ignores it!)
     char buffer[MAXDATASIZE];
-    int num_read = 0;
 
-    //read a message from the client
-    num_read = read(msgsock, buffer, MAXDATASIZE - 1);
-    printf("read a message %d bytes: %s\n", num_read, buffer);
+    // read a message from the client
+    int num_read = read(msgsock, buffer, MAXDATASIZE - 1);
+    while(num_read != '\0') {
 
+        buffer[num_read] = 0;
+        printf("read a message %d bytes: %s\n", num_read, buffer);
 
-    // TODO: write a function to reply to all incoming messages
-    // while the connection remains open
+        // write to socket
+        write(msgsock, buffer, num_read);
+        num_read = read(msgsock, buffer, MAXDATASIZE - 1);
+    }
 
-    ///////////////////
-
-
+    // close the socket
+    close(msgsock);
 }
 
 
 // handle request by forking a new process
 void handle_fork(int msgsock) {
 
-    //TODO: run this line inside a forked child process
-    handle_request(msgsock);
+    // run this line inside a forked child process
+    if(fork() == 0) { 
+        // in child process
+        handle_request(msgsock);
+        exit(0);  // exit child process
+    } else {         
+        // in parent process
+        
+        // close socket
+        close(msgsock);
+    }
 
     // Be very careful to close all sockets used, 
     // and exit any processes or threads which aren't used
@@ -95,7 +104,9 @@ int main(int argc, char *argv[]) {
     while (1) { // forever
 
         int msgsock = accept_connection(s); // wait for a client to connect
-        printf("Got connection from client!");
+        printf("Got connection from client!\n");
+
+        handle_request(msgsock);
 
         // handle the request with a new process
         handle_fork(msgsock);
@@ -104,4 +115,3 @@ int main(int argc, char *argv[]) {
     close(s);
     exit(0);
 }
-
