@@ -29,7 +29,11 @@ int main(int argc, char *argv[])
 
 	// place your code between the lines of //
 	///////////////////////////////////////////////////////
-    connect(sockfd, their_addr->ai_addr, their_addr->ai_addrlen);  // connect to server
+    int rc = connect(sockfd, their_addr->ai_addr, their_addr->ai_addrlen);  // connect to server
+	if (rc == -1) {
+        perror("connect");
+        exit(1);
+    }
 
 	///////////////////////////////////////////////////////
 
@@ -38,7 +42,7 @@ int main(int argc, char *argv[])
 	// get data from the server:
 	// place your code between the lines of //
 	///////////////////////////////////////////////////////
-
+	numbytes = read(sockfd, buffer, MAXDATASIZE - 1); 
 
 	///////////////////////////////////////////////////////
 
@@ -54,7 +58,6 @@ int main(int argc, char *argv[])
         write(sockfd, buffer, strlen(buffer));
         numbytes = read(sockfd, buffer, MAXDATASIZE - 1);   
 
-        printf("server: %s\n", buffer);
 		///////////////////////////////////////////////////////
 	}
 	// place your code between the lines of //

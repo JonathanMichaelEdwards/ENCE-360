@@ -62,9 +62,8 @@ int main(int argc, char *argv[])  {
 		// send data to the client and then get data back from the client:
 		// place your code between the lines of //
 		///////////////////////////////////////////////////////
-        printf("read a message %d bytes: %s\n", numbytes, message);
 
-        write(msgsock, message, numbytes);
+        write(msgsock, message, strlen(message));
         numbytes = read(msgsock, message, MAXDATASIZE - 1);
 
 		///////////////////////////////////////////////////////

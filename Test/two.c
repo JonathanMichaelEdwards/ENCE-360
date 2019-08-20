@@ -13,8 +13,8 @@ void translator(int input_pipe[], int output_pipe[])
 	/* first, close unnecessary file descriptors */ 
 	// place your code between the lines of //
 	///////////////////////////////////////////////
-    close(input_pipe[0]); 
-    close(output_pipe[1]); 
+    close(input_pipe[1]);
+	close(output_pipe[0]);  
 
 	///////////////////////////////////////////////
 
@@ -30,9 +30,7 @@ void translator(int input_pipe[], int output_pipe[])
 		/* write translated character back to user_handler. */ 
 		// place your code between the lines of //
 		///////////////////////////////////////////////
-        dup2(input_pipe[0], STDOUT_FILENO);
-        // write(0, (char*)&ch, 100);
-        printf("%c", ch);
+        rc = write(output_pipe[1], &ch, 1);
 
 		///////////////////////////////////////////////
 
@@ -60,8 +58,8 @@ void user_handler(int input_pipe[], int output_pipe[])
 	/* first, close unnecessary file descriptors */ 
 	///////////////////////////////////////////////
 	// place your code between the lines of //
-    // close(input_pipe[0]); 
-    // close(output_pipe[1]); 
+    close(input_pipe[1]);
+	close(output_pipe[0]);  
 
 	///////////////////////////////////////////////
 
@@ -75,7 +73,7 @@ void user_handler(int input_pipe[], int output_pipe[])
 		/* write to translator */ 
 		///////////////////////////////////////////////
 		// place your code between the lines of //
-        dup2(output_pipe[1], STDIN_FILENO);
+        rc = write(output_pipe[1], &ch, 1);
 
 		///////////////////////////////////////////////
 
@@ -89,7 +87,7 @@ void user_handler(int input_pipe[], int output_pipe[])
 		/* read back from translator */ 
 		///////////////////////////////////////////////
 		// place your code between the lines of //
-        dup2(output_pipe[0], STDIN_FILENO);
+        rc = read(input_pipe[0], &ch, 1);
 
 		///////////////////////////////////////////////
 

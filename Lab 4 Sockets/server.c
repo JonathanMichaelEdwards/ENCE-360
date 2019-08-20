@@ -58,7 +58,7 @@ void handle_request(int msgsock)
         printf("read a message %d bytes: %s\n", num_read, buffer);
 
         // write to socket
-        write(msgsock, buffer, num_read);
+        write(msgsock, buffer, strlen(buffer));
         num_read = read(msgsock, buffer, MAXDATASIZE - 1);
     }
 
