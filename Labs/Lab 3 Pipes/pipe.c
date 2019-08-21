@@ -9,11 +9,11 @@
 #include <string.h>
 #include <sys/wait.h>
 
+
 int parent_to_child[2];
 int child_to_parent[2];
 static char message[BUFSIZ];
 int child_status, size;
-
 
 #define INP 1
 #define OUTP 0
