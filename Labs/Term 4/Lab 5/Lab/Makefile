@@ -24,7 +24,7 @@ read_write: $(READ_OBJ)
 
 fread_fwrite: $(FREAD_OBJ)
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
-J
+
 realloc: $(REALLOC_OBJ)
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 	
