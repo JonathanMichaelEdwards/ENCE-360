@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "typeinfo": "cpp"
-    },
-    "debug.node.autoAttach": "on"
-}
