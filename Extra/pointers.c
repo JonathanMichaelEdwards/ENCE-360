@@ -18,7 +18,9 @@
 // Concaternating extra characters by reallocating memory
 void addOn(const char *message_1, const char *message_2, char *text)
 {
-    text = (char*)realloc(text, sizeof(char*) * (strlen(message_1)+strlen(message_2)+1));
+    printf("%ld ",  sizeof(int*));
+    text = (char*)realloc(text, sizeof(char) * (strlen(message_1)+strlen(message_2)+1));
+    printf("%ld\n",  sizeof(char) * (strlen(message_1)+strlen(message_2)+1));
 
     for (int i = 0; i < strlen(message_2); i++)
         text[strlen(message_1)+i] = message_2[i];
@@ -43,13 +45,13 @@ void singlePoninter(const char *message, char *text)
 void doublePoninter(const char *message, char **cpyText)
 {
     const char *type = "from the DOUBLE pointer.";
-    char *text = (char*)malloc(sizeof(char*) * strlen(message)+1);
+    char *text = (char*)malloc(sizeof(char) * strlen(message)+1);
     
     for (int i = 0; i < strlen(message); i++) 
         text[i] = message[i];
     
     addOn(message, type, text);  // Adding extra text
-    *cpyText = text;  // Pointing the double pointer to the text
+    *cpyText = text;             // Pointing the double pointer to the text
 }
 
 
@@ -69,7 +71,7 @@ int main()
     const char *message = "Hello ";
     const int luckyNumber = 6;
 
-    char *cpyText_1 = (char*)malloc(sizeof(char*) * strlen(message)+1);
+    char *cpyText_1 = (char*)malloc(sizeof(char) * strlen(message)+1);
     char *cpyText_2 = NULL;
     int value = 0;
     int *value_2 = 0;

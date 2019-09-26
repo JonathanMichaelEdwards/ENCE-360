@@ -9,15 +9,36 @@
 
 #include "http.h"
 
+
+#define RANGE_LIMIT 500
 #define BUF_SIZE 1024
 
 
+int receive_basic(int s)
+{
+	int size_recv;
+    int total_size = BUF_SIZE;
+    int buff = BUF_SIZE;
+	char chunk[1200];
+	
+	//loop
+	while(1)
+	{
+		// memset(chunk, 0 ,buff);	//clear the variable
+        size_recv =  recv(s, chunk, buff, 0);
+		if (size_recv == buff) {
+	        total_size += size_recv;
+        } else if (size_recv < buff) break;
+	}
+	
+	return total_size;
+}
 
 
 /**
  * Perform an HTTP 1.0 query to a given host and page and port number.
  * host is a hostname and page is a path on the remote server. The query
- * will attempt to retrievev content in the given byte range.
+ * will attempt to retrrecv(s, chunk, BUF_SIZE, 0)ieve content in the given byte range.
  * User is responsible for freeing the memory.
  * 
  * @param host - The host name e.g. www.canterbury.ac.nz
@@ -27,8 +48,107 @@
  * @return Buffer - Pointer to a buffer holding response data from query
  *                  NULL is returned on failure.
  */
-Buffer* http_query(char *host, char *page, const char *range, int port) {
-    assert(0 && "not implemented yet!");
+Buffer *http_query(char *host, char *page, const char *range, int port) 
+{
+    // struct addrinfo their_addrinfo, *their_addr = NULL;  // connector's and Servers address information   
+
+    // Allocating space for the port and Buffer in memory
+    char *usrPort = (char*)malloc(sizeof(char) * RANGE_LIMIT);
+    char *header = malloc(sizeof(char) * (strlen(page) + strlen(host)) + 27);
+    Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
+    buffer->data = (char*)malloc(sizeof(char) * BUF_SIZE);
+    buffer->length = BUF_SIZE;
+
+    printf("%ld\n", sizeof(buffer->data));
+    printf("%ld\n", sizeof(char) * BUF_SIZE);
+
+    // printf("%ld\n", sizeof(char) * (strlen(page) + strlen(host))+27);
+
+    // // Display error if port isnt within bounds
+    // // Make a string out of the port number
+    int n = snprintf(usrPort, RANGE_LIMIT, "%d", port);  
+    if ((n < 0 ) || (n > RANGE_LIMIT)) {
+        printf("ERROR: Malformed Port\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // // Creating a Socket and IP information
+    // int sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);;  
+    // memset(&their_addrinfo, 0, sizeof(struct addrinfo));
+    // their_addrinfo.ai_family = AF_INET;         // Use an internet address
+    // their_addrinfo.ai_socktype = SOCK_STREAM;   // Wanting to use TCP
+    
+    sprintf(usrPort, "%d", port);  // change port to a string                          
+    // getaddrinfo("www.example.com", usrPort, &their_addrinfo, &their_addr);  // Get IP info
+
+    // // Connect to the server/host
+    // int rc = connect(sockfd, their_addr->ai_addr, their_addr->ai_addrlen);
+    // if (rc == -1) {
+    //     perror("connect");
+    //     exit(EXIT_FAILURE);
+    // }
+
+    // char *header = "GET /index.html HTTP/1.0\r\nHost: www.example.com\r\n\r\n";
+    // send(sockfd, header, sizeof(header), 0);
+
+    // int byte_count = recv(sockfd, buffer->data, sizeof(buffer->data), 0);
+    // printf("recv()'d %d bytes of data in buf\n",byte_count);
+    // printf("%s\n\n\n\n",buffer->data);
+
+
+    // close(sockfd);
+
+    struct addrinfo their_addrinfo;
+    struct addrinfo *res = NULL;
+    int sockfd;
+    int byte_count;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
+
+    //get host info, make socket and connect it
+    memset(&their_addrinfo, 0, sizeof(their_addrinfo));
+    their_addrinfo.ai_family = AF_INET;
+    their_addrinfo.ai_socktype = SOCK_STREAM;
+
+    getaddrinfo(host, usrPort, &their_addrinfo, &res);
+    
+    connect(sockfd, res->ai_addr, res->ai_addrlen);
+
+    sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", page, host);
+
+    send(sockfd, header, strlen(header), 0);
+
+    int numbytes = 0;
+
+    //all right ! now that we're connected, we can receive some data!
+    // byte_count = recv(sockfd, (void*)buffer->data, 300, 0); // <-- -1 to leave room for a null terminator
+    // buffer->data[byte_count] = 0; // <-- add the null terminator
+    // printf("%d\n", byte_count);
+    // write(sockfd, header, strlen(header));
+
+    // numbytes = read(sockfd, (void*)buffer->data, 1000);
+    printf("%d\n", receive_basic(sockfd));
+
+    // do {
+    //     // write and read from server
+    //     write(sockfd, header, strlen(header));
+
+    //     buffer->data = (char*)realloc(buffer->data, 3000);
+
+    //     // memcpy(buffer->data + buffer->length, buffer->data, 1000);
+
+	//     // buffer->length += bytes;
+
+    //     printf("%ld\n", sizeof(buffer->data));
+    //     numbytes = read(sockfd, (void*)buffer->data, bytes);
+
+    //     buffer->data[numbytes] = 0;
+    //     bytes += BUF_SIZE;
+
+    // } while (numbytes > 0);
+
+
+    return buffer;
 }
 
 
@@ -72,7 +192,7 @@ Buffer *http_url(const char *url, const char *range) {
         ++page;
         return http_query(host, page, range, 80);
     }
-    else {
+    else {  // char *header = 0;
 
         fprintf(stderr, "could not split url into host/page %s\n", url);
         return NULL;
