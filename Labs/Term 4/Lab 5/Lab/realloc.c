@@ -34,7 +34,7 @@ Buffer *new_buffer(size_t reserved)
 
     resBuff->data = malloc(reserved);
     resBuff->reserved = reserved;
-	resBuff->length = 0;
+	  resBuff->length = 0;
     
     // assert(0 && "not implemented");
 

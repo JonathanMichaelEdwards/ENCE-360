@@ -4,7 +4,6 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
-
 #include "matrix.h"
 
 
@@ -46,8 +45,25 @@ void matrix_mul_transposed(double *res, double *a, double *b, int n)
     double *bt = alloc_matrix(n);
     matrix_transpose(bt, b, n);
     
+    ///
     // TODO: implement matrix multiplication between a and transposed matrix bt
-    matrix_mul_basic(res, bt, a, n);
+    int i, j, k;
+  
+    for (i = 0; i < n; ++i) {
+      for (j = 0; j < n; ++j) {
+        
+        double r = 0.0;
+
+        // Compute res(i, j) as dot product of ith row of a and jth column of b
+        // Sum entries
+        for (k = 0; k < n; ++k) {
+          r += a[i * n + k] * bt[j * n + k];
+        }
+        
+        res[i * n + j] = r;
+      }
+    }
+    ///
 
     free(bt);
 }
@@ -87,15 +103,15 @@ void matrix_mul_blocked(double *res, double *a, double *b, int n, int block)
                 
                 // loop over inner block
                 //TODO: finish blocked matrix implementation
-                for (ii = 0; ii < i_end; ++ii) {
-                    for (jj = 0; jj < j_end; ++jj) { 
+                for (ii = i; ii < i_end; ++ii) {
+                    for (jj = j; jj < j_end; ++jj) { 
 
                         double r = 0.0;
 
-                        for (kk = 0; kk < k_end; ++kk) {
+                        for (kk = k; kk < k_end; ++kk) {
                             r += a[ii * n + kk] * b[kk * n + jj];
                         }
-                        res[ii * n + jj] = r;
+                        res[ii * n + jj] += r;
                     }
                 }
             }
