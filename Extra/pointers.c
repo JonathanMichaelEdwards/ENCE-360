@@ -18,9 +18,7 @@
 // Concaternating extra characters by reallocating memory
 void addOn(const char *message_1, const char *message_2, char *text)
 {
-    printf("%ld ",  sizeof(int*));
     text = (char*)realloc(text, sizeof(char) * (strlen(message_1)+strlen(message_2)+1));
-    printf("%ld\n",  sizeof(char) * (strlen(message_1)+strlen(message_2)+1));
 
     for (int i = 0; i < strlen(message_2); i++)
         text[strlen(message_1)+i] = message_2[i];
