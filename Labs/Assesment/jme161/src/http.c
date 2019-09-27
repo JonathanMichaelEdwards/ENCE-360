@@ -11,7 +11,7 @@
 
 
 #define RANGE_LIMIT 500
-#define BUF_SIZE 300
+#define BUF_SIZE 3000
 
 
 // int receive_basic(int s)
@@ -83,17 +83,17 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
         exit(EXIT_FAILURE);
     }
     
-    
+    puts("yes");
     sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
-
+    puts("yes");
     //get host info, make socket and connect it
     memset(&their_addrinfo, 0, sizeof(their_addrinfo));
     their_addrinfo.ai_family = AF_INET;
     their_addrinfo.ai_socktype = SOCK_STREAM;
-
+     puts("yes");
     sprintf(usrPort, "%d", port);  // change port to a string     
     getaddrinfo(host, usrPort, &their_addrinfo, &res);
-    
+     puts("yes");
     // Connect to the server/host;
     int rc = connect(sockfd, res->ai_addr, res->ai_addrlen);
     if (rc == -1) {
@@ -101,6 +101,7 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
         exit(EXIT_FAILURE);
     }
 
+    puts("yes");
     sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", page, host);
 
     // send(sockfd, header, strlen(header), 0);
@@ -111,26 +112,28 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     // byte_count = recv(sockfd, (void*)buffer->data, 1030, 0); // <-- -1 to leave room for a null terminator
     // buffer->data[byte_count] = 0; // <-- add the null terminator
     // printf("%d\n", byte_count);
+    puts("yes");
     write(sockfd, header, strlen(header));
 
     // numbytes = read(sockfd, (void*)buffer->data, 1000);
     // printf("%d\n", receive_basic(sockfd));
 
 	int size_recv = 0;
-    int total_size = 0;
-    // char chunk[1600];
-    char *buff[500];
+    // int total_size = 0;
+    // // char chunk[1600];
+    // char *buff[500];
 
     // do {
+        puts("yes");
     size_recv = read(sockfd, (void*)buffer->data, BUF_SIZE);;
     // memcpy(buff, buffer->data, BUF_SIZE);
-   
-    buffer->data = realloc((void*)buffer->data, BUF_SIZE+105);
-    // size_recv = read(sockfd, (void*)&buffer->data[size_recv], 105);
-    size_recv = read(sockfd, (void*)&buffer->data[size_recv], 104);
-    // total_size += size_recv;
-    // printf("recv  %d\n", total_size);
-    printf("recv  %d\n",  size_recv);
+    puts("yes");
+    // buffer->data = realloc((void*)buffer->data, BUF_SIZE+105);
+    // // size_recv = read(sockfd, (void*)&buffer->data[size_recv], 105);
+    // size_recv = read(sockfd, (void*)&buffer->data[size_recv], 104);
+    // // total_size += size_recv;
+    // // printf("recv  %d\n", total_size);
+    // printf("recv  %d\n",  size_recv);
 
 
     // buffer->data = realloc((void*)buffer->data, BUF_SIZE+200);
@@ -163,16 +166,16 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
 
 
     // char *store = malloc(sizeof(char) *  + 1);
-    char *message1 = "Hello";
-    char *message2 = " Jonathan";
+    // char *message1 = "Hello";
+    // char *message2 = " Jonathan";
 
-    char *name = malloc(sizeof(char) * strlen(message1));  // initial
+    // char *name = malloc(sizeof(char) * strlen(message1));  // initial
 
-    memcpy(name, message1, 6);  // copy the first message
-    name = realloc(name, sizeof(char) * 16);
-    memcpy(&name[5], message2, 10);  // concaternate the second message with the first
+    // memcpy(name, message1, 6);  // copy the first message
+    // name = realloc(name, sizeof(char) * 16);
+    // memcpy(&name[5], message2, 10);  // concaternate the second message with the first
 
-    puts(name);
+    // puts(name);
 
     return buffer;
 }
