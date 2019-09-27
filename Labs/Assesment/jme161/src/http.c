@@ -158,20 +158,9 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     //     bytes += BUF_SIZE;
 
     // } while (numbytes > 0);
+    
     close(sockfd);
 
-
-    // char *store = malloc(sizeof(char) *  + 1);
-    // char *message1 = "Hello";
-    // char *message2 = " Jonathan";
-
-    // char *name = malloc(sizeof(char) * strlen(message1));  // initial
-
-    // memcpy(name, message1, 5);  // copy the first message
-    // name = realloc(name, sizeof(char) * 14 + 1);  // or 16
-    // memcpy(&name[5], message2, 9);  // concaternate the second message with the first
-
-    // puts(name);
 
     return buffer;
 }
