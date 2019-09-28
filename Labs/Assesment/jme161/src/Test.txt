@@ -13,3 +13,4 @@
 
 
 # Part 2:
+./queue_test

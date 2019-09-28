@@ -1,5 +1,3 @@
-#include "queue.h"
-
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdlib.h>
@@ -7,11 +5,15 @@
 #include <errno.h>
 #include <assert.h>
 
+#include "queue.h"
+
+
 #define handle_error_en(en, msg) \
         do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
 #define handle_error(msg) \
         do { perror(msg); exit(EXIT_FAILURE); } while (0)
+
 
 
 /*
@@ -25,11 +27,12 @@ typedef struct QueueStruct {
 
 /**
  * Allocate a concurrent queue of a specific size
- * @param size - The size of memory to allocate to the queue
+ * @param size   - The size of memory to allocate to the queue
  * @return queue - Pointer to the allocated queue
  */
-Queue *queue_alloc(int size) {
-    assert(0 && "not implemented yet!");
+Queue *queue_alloc(int size) 
+{
+    Queue *queue = (Queue*)malloc(sizeof(Queue));
 }
 
 
@@ -43,7 +46,7 @@ Queue *queue_alloc(int size) {
  * @param queue - Pointer to the queue to free
  */
 void queue_free(Queue *queue) {
-    assert(0 && "not implemented yet!");
+    // assert(0 && "not implemented yet!");
 }
 
 
@@ -54,12 +57,12 @@ void queue_free(Queue *queue) {
  * put the item into the queue and immediatly return
  *  
  * @param queue - Pointer to the queue to add an item to
- * @param item - An item to add to queue. Uses void* to hold an arbitrary
+ * @param item  - An item to add to queue. Uses void* to hold an arbitrary
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
 void queue_put(Queue *queue, void *item) {
-    assert(0 && "not implemented yet!");
+    // assert(0 && "not implemented yet!");
 }
 
 
@@ -75,6 +78,5 @@ void queue_put(Queue *queue, void *item) {
  *                arbitrary 
  */
 void *queue_get(Queue *queue) {
-    assert(0 && "not implemented yet!");
+    // assert(0 && "not implemented yet!");
 }
-

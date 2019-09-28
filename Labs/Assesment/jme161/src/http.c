@@ -10,16 +10,15 @@
 #include "http.h"
 
 
+#define HANDLE_ERROR(msg) \
+        do { puts("Error: "msg); exit(EXIT_FAILURE); } while(0)
+
 #define HEADER(PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", PAGE, HOST);
+
 #define RANGE_LIMIT 500
 #define EMPTY_HEADER_SIZE 31
 #define BUF_SIZE 1024
 
-
-// Error checking
-void checkPort(int n) { if ((n < 0 ) || (n > RANGE_LIMIT)) { puts("ERROR: Malformed Port"); exit(EXIT_FAILURE); }}
-void checkSocket(int soc) { if (soc == -1) { perror("socket"); exit(EXIT_FAILURE); }}
-void checkConnect(int rc) { if (rc == -1) { perror("connect"); exit(EXIT_FAILURE); }}
 
 
 /**
@@ -85,19 +84,19 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     buffer->length = 0;
 
     // Format the port to a string   
-    int n = sprintf(usrPort, "%d", port);  
-    checkPort(n);
+    sprintf(usrPort, "%d", port);
+    if ((port < 0 ) || (port > RANGE_LIMIT)) HANDLE_ERROR("port");
     
     // Create a socket and get the hosts info
     int sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
-    checkSocket(sockfd);
+    if (sockfd == EOF) HANDLE_ERROR("socket");
     addrInfo.ai_family = AF_INET;
     addrInfo.ai_socktype = SOCK_STREAM;
     getaddrinfo(host, usrPort, &addrInfo, &addr);
 
     // Connect to the host;
     int rc = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
-    checkConnect(rc);
+    if (rc == EOF) HANDLE_ERROR("connect");
 
     // Formatting the header
     HEADER(page, host);
