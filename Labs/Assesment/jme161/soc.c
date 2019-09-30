@@ -10,8 +10,8 @@ int main(void)
 {
     //Stream sockets and rcv()
 
-    struct addrinfo their_addrinfo;
-    struct addrinfo *res = NULL;
+    struct addrinfo addrinfo;
+    struct addrinfo *addr = NULL;
     int sockfd;
 
     char buf[2056];
@@ -20,14 +20,14 @@ int main(void)
     sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
 
     //get host info, make socket and connect it
-    memset(&their_addrinfo, 0, sizeof(their_addrinfo));
-    their_addrinfo.ai_family = AF_INET;
-    their_addrinfo.ai_socktype = SOCK_STREAM;
+    memset(&addrinfo, 0, sizeof(addrinfo));
+    addrinfo.ai_family = AF_INET;
+    addrinfo.ai_socktype = SOCK_STREAM;
 
-    getaddrinfo("www.example.com", "80", &their_addrinfo, &res);
+    getaddrinfo("www.example.com", "80", &addrinfo, &addr);
     
     printf("Connecting...\n");
-    connect(sockfd,res->ai_addr,res->ai_addrlen);
+    connect(sockfd,addr->ai_addr,addr->ai_addrlen);
     printf("Connected!\n");
 
     // char *header = "GET /postgrad/documents/cribphdmay.doc HTTP/1.0\r\n" \

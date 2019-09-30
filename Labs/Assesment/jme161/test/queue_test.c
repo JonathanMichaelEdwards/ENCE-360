@@ -5,7 +5,7 @@
 
 #include "queue.h"
 
-#define NUM_THREADS 16
+#define NUM_THREADS 1 //16
 #define N 1000000
 
 typedef struct {
@@ -20,6 +20,7 @@ void *doSum(void *arg) {
     Task *task = (Task*)queue_get(queue);
     while (task) {
         sum += task->value;
+        printf("%d\n", sum);
         free(task);
 
         task = (Task*)queue_get(queue);

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -11,22 +10,50 @@
 #include "http.h"
 
 
+#define HANDLE_ERROR(msg) \
+        do { puts("Error: "msg); exit(EXIT_FAILURE); } while(0)
+
+#define HEADER(PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", PAGE, HOST);
+
 #define RANGE_LIMIT 500
+#define EMPTY_HEADER_SIZE 31
 #define BUF_SIZE 1024
 
 
-size_t reserved = BUF_SIZE;
 
-
-void append_buffer(Buffer *buffer, size_t length) 
+/**
+ * Close the socket and free memory.
+ */
+void clear(int sockfd, char *usrPort, char *header)
 {
-	while ((length + buffer->length) < reserved) {
-		reserved *= 2;
-    	buffer->data = realloc(buffer->data, reserved);
-	}
-    buffer->length += length;
+    close(sockfd);
+    free(usrPort);
+    free(header);
+}
 
-    return buffer;
+
+/**
+ * Read N bytes from the FD (File directory) into a Buffer until the number of bytes 
+ * isn't greater then 0.
+ * Algorithm:
+ * - Store the byte info read from FD into a data buffer located at the new buffers
+ *   length and check that the number of bytes is greater then 0.
+ * - If it is, increase the buffers length by the number of bytes read from FD.
+ * - Then Dynamically resize the Buffers data byte size to have a new size of 
+ *   exactly the length of the buffer + BUF_SIZE.
+ * - Keep looping until the number of bytes read from FD isn't greater then 0.
+ * 
+ * @param sockfd - Information about the host is stored in a file descriptor
+ * @param Buffer - Pointer to buffer holding response data and it's length
+ */
+void readBytes(int sockfd, Buffer *buffer)
+{
+    size_t bytes = 0;
+
+    while ((bytes = read(sockfd, (void*)&buffer->data[buffer->length], BUF_SIZE)) > 0) {
+        buffer->length += bytes;
+        buffer->data = realloc(buffer->data, (buffer->length+BUF_SIZE));
+    }
 }
 
 
@@ -36,165 +63,51 @@ void append_buffer(Buffer *buffer, size_t length)
  * will attempt to retrrecv(s, chunk, BUF_SIZE, 0)ieve content in the given byte range.
  * User is responsible for freeing the memory.
  * 
- * @param host - The host name e.g. www.canterbury.ac.nz
- * @param page - e.g. /index.html
+ * @param host  - The host name e.g. www.canterbury.ac.nz
+ * @param page  - e.g. /index.html
  * @param range - Byte range e.g. 0-500. NOTE: A server may not respect this
- * @param port - e.g. 80
+ * @param port  - e.g. 80
  * @return Buffer - Pointer to a buffer holding response data from query
  *                  NULL is returned on failure.
  */
 Buffer *http_query(char *host, char *page, const char *range, int port) 
 {
-    // struct addrinfo their_addrinfo, *their_addr = NULL;  // connector's and Servers address information   
-    struct addrinfo their_addrinfo;
-    struct addrinfo *res = NULL;
-    int sockfd;
-    int byte_count;
+    // Initialize Connector's and Server's address info   
+    struct addrinfo addrInfo = {0};
+    struct addrinfo *addr = NULL;
 
-    // Allocating space for the port and Buffer in memory
+    // Dynamically allocating memory space 
     char *usrPort = (char*)malloc(sizeof(char) * RANGE_LIMIT);
-    char *header = malloc(sizeof(char) * (strlen(page) + strlen(host)) + 27);
+    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
-    buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE + 27));  // 27 for the header
+    buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE));
     buffer->length = 0;
 
-    // printf("%ld\n", sizeof(buffer->data));
-    // printf("%ld\n", sizeof(char) * BUF_SIZE);
-
-    // printf("%ld\n", sizeof(char) * (strlen(page) + strlen(host))+27);
-
-    // // Display error if port isnt within bounds
-    // // Make a string out of the port number
-    int n = snprintf(usrPort, RANGE_LIMIT, "%d", port);  
-    if ((n < 0 ) || (n > RANGE_LIMIT)) {
-        printf("ERROR: Malformed Port\n");
-        exit(EXIT_FAILURE);
-    }
+    // Format the port to a string   
+    sprintf(usrPort, "%d", port);
+    if ((port < 0 ) || (port > RANGE_LIMIT)) HANDLE_ERROR("port");
     
-    sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
-    //get host info, make socket and connect it
-    memset(&their_addrinfo, 0, sizeof(their_addrinfo));
-    their_addrinfo.ai_family = AF_INET;
-    their_addrinfo.ai_socktype = SOCK_STREAM;
-    sprintf(usrPort, "%d", port);  // change port to a string     
-    getaddrinfo(host, usrPort, &their_addrinfo, &res);
-    // Connect to the server/host;
-    int rc = connect(sockfd, res->ai_addr, res->ai_addrlen);
-    if (rc == -1) {
-        perror("connect");
-        exit(EXIT_FAILURE);
-    }
+    // Create a socket and get the hosts info
+    int sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
+    if (sockfd == EOF) HANDLE_ERROR("socket");
+    addrInfo.ai_family = AF_INET;
+    addrInfo.ai_socktype = SOCK_STREAM;
+    getaddrinfo(host, usrPort, &addrInfo, &addr);
 
-    sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", page, host);
+    // Connect to the host;
+    int rc = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
+    if (rc == EOF) HANDLE_ERROR("connect");
 
-    // send(sockfd, header, strlen(header), 0);
-
-    int numbytes = 0;
-
-    //all right ! now that we're connected, we can receive some data!
-    // byte_count = recv(sockfd, (void*)buffer->data, 1030, 0); // <-- -1 to leave room for a null terminator
-    // buffer->data[byte_count] = 0; // <-- add the null terminator
-    // printf("%d\n", byte_count);
-
-    // buffer->data = realloc((void*)buffer->data, BUF_SIZE+100000000);
-    // numbytes = read(sockfd, (void*)buffer->data, BUF_SIZE+10000);
-    // printf("%d\n", numbytes);
-    // numbytes = read(sockfd, (void*)&buffer->data[numbytes], BUF_SIZE+10000);
-    // printf("%d\n", numbytes);
-    // numbytes = read(sockfd, (void*)&buffer->data[numbytes], BUF_SIZE+10000);
-    // printf("%d\n", numbytes);
-    // numbytes = read(sockfd, (void*)&buffer->data[numbytes], BUF_SIZE+10000);
-    // printf("%d\n", numbytes);
-    // numbytes = read(sockfd, (void*)&buffer->data[numbytes], BUF_SIZE+10000);
-    // printf("%d\n", numbytes);
-    // size_t bytes = 0;
-
-    // while((bytes = read(sockfd, (void*)&buffer->data[bytes], BUF_SIZE+100000000)) > 0) {
-    //   buffer->length += bytes;
-    // }
-    size_t bytes = 0;
-    size_t buffData = 0;
-    size_t a = 1000000;
-    bool reset = false;
-
+    // Formatting the header
+    HEADER(page, host);
+    
+    // Write and read N bytes of header data to FD
     write(sockfd, header, strlen(header));
-    bytes = read(sockfd, (void*)buffer->data, BUF_SIZE);
-
-    do {
-        // if (reset) buffer->data = realloc((void*)buffer->data, BUF_SIZE);
-        // buffer->data = realloc((void*)buffer->data, buffData);
-        append_buffer(buffer, bytes);
-        printf("%ld\n", buffer->length);
-        bytes = read(sockfd, (void*)&buffer->data[buffer->length], BUF_SIZE);
-        // buffData += BUF_SIZE + 27;
-        // reset = true;
-    } while (bytes > 0);
-
-	// int size_recv = 0;
-    // int total_size = 0;
-    // // char chunk[1600];
-    // char *buff[500];
-
-    // do {
-    //     size_recv = read(sockfd, (void*)buffer->data, BUF_SIZE);;
-    //     // memcpy(buff, buffer->data, BUF_SIZE);
-    
-    //     buffer->data = realloc((void*)buffer->data, BUF_SIZE+105);
-    //     // size_recv = read(sockfd, (void*)&buffer->data[size_recv], 105);
-    //     size_recv = read(sockfd, (void*)&buffer->data[size_recv], 105);
-    //     // total_size += size_recv;
-    //     // printf("recv  %d\n", total_size);
-    //     printf("recv  %d\n",  size_recv);
-    // } while (size_recv == BUF_SIZE);
-
-
-    // buffer->data = realloc((void*)buffer->data, BUF_SIZE+200);
-    // memset((void*)buffer->data, 0, 500);
-    // // buffer->data = realloc((void*)buffer->data, BUF_SIZE+200);
-    // size_recv = read(sockfd, (void*)buffer->data, BUF_SIZE+200);
-
-    // } while(size_recv == BUF_SIZE);
-
-    // memcpy((void*)buffer->data, chunk, 1448);
-
-    // do {
-    //     // write and read from server
-    //     write(sockfd, header, strlen(header));
-
-    //     buffer->data = (char*)realloc(buffer->data, 3000);
-
-    //     // memcpy(buffer->data + buffer->length, buffer->data, 1000);
-
-	//     // buffer->length += bytes;
-
-    //     printf("%ld\n", sizeof(buffer->data));
-    //     numbytes = read(sockfd, (void*)buffer->data, bytes);
-
-    //     buffer->data[numbytes] = 0;
-    //     bytes += BUF_SIZE;
-
-    // } while (numbytes > 0);
-    free(usrPort);
-    free(header);
-    close(sockfd);
-
-
-    // char *store = malloc(sizeof(char) *  + 1);
-    // char *message1 = "Hello";
-    // char *message2 = " Jonathan";
-
-    // char *name = malloc(sizeof(char) * strlen(message1));  // initial
-
-    // memcpy(name, message1, 5);  // copy the first message
-    // name = realloc(name, sizeof(char) * 14);
-    // memcpy(&name[5], message2, 9);  // concaternate the second message with the first
-
-    // puts(name);
+    readBytes(sockfd, buffer);
+    clear(sockfd, usrPort, header);  // Close socket and free memory
 
     return buffer;
 }
-
-
 
 
 /**
