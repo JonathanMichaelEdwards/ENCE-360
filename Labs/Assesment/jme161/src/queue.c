@@ -22,6 +22,14 @@
  * but it is hidden from the outside.
  */
 typedef struct QueueStruct {
+    sem_t read;
+    sem_t write;
+    pthread_mutex_t lock;
+    
+    pthread_mutex_t head_lock;
+
+    struct QueueStruct *next;
+    void *value;
 } Queue;
 
 
@@ -33,6 +41,13 @@ typedef struct QueueStruct {
 Queue *queue_alloc(int size) 
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
+    queue->next = (Queue*)malloc(sizeof(Queue) * size);
+
+    pthread_mutex_init(&queue->lock, NULL);
+    sem_init(&queue->read, 0, 0);
+    // // sem_init(&queue->write, 0, 1);
+
+    return queue;
 }
 
 
@@ -45,8 +60,19 @@ Queue *queue_alloc(int size)
  * 
  * @param queue - Pointer to the queue to free
  */
-void queue_free(Queue *queue) {
-    // assert(0 && "not implemented yet!");
+void queue_free(Queue *queue) 
+{
+    // free(queue->next);
+    // free(queue);
+
+    // Queue *head = NULL;
+
+    // for (Queue *l = queue; l != NULL;) {
+    //     Queue *next = l->next;
+    //     free(l);
+
+    //     l = next;
+    // }
 }
 
 
@@ -61,8 +87,22 @@ void queue_free(Queue *queue) {
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
-void queue_put(Queue *queue, void *item) {
-    // assert(0 && "not implemented yet!");
+void queue_put(Queue *queue, void *item) 
+{   
+    // Queue *head = (Queue*)malloc(sizeof(Queue));
+   
+    // // wait until the queue has been written to
+    // // sem_wait(&queue->read);
+
+    // pthread_mutex_lock(&queue->lock);
+	// // queue->store[queue->tail++] = *(int*)item; 
+
+    // head->next = head;
+    // head->value = item;
+
+    // pthread_mutex_unlock(&queue->lock);
+    // sem_post(&queue->write);
+
 }
 
 
@@ -77,6 +117,129 @@ void queue_put(Queue *queue, void *item) {
  * @return item - item retrieved from queue. void* type since it can be 
  *                arbitrary 
  */
-void *queue_get(Queue *queue) {
-    // assert(0 && "not implemented yet!");
+void *queue_get(Queue *queue) 
+{
+    void *item = malloc(sizeof(queue));
+    // void *item = 0;
+
+    // Queue *head, *next; 
+    // // sem_wait(&queue->read);
+    
+    int sum = 10;
+
+    item = (int*)&sum;
+
+    // printf("%p\n", item);
+    // queue_put(queue, &item);
+    
+    // // pthread_mutex_lock(&queue->lock);
+    // item = (void*)&queue->store[queue->head++]; 
+    // // pthread_mutex_unlock(&queue->lock);
+    // // sem_post(&queue->read)
+    
+    
+    // // sem_post(&queue->read);
+    
+    // printf("%d\n", *(int*)item);
+    // puts("here");
+    
+
+    return item;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// #define QUEUE_POISON1 ((void*)0xCAFEBAB5)
+
+// typedef struct QueueStruct {
+// 	struct QueueStruct *head;
+// 	pthread_mutex_t head_lock;
+
+// 	struct QueueStruct *tail;
+// 	pthread_mutex_t tail_lock;
+
+// 	struct QueueStruct *divider;
+// } Queue;
+
+
+// Queue *queue_alloc(int size)
+// {
+// 	Queue *root = 
+// 		malloc(sizeof(Queue));
+// 	pthread_mutex_init(&root->head_lock, NULL);
+// 	pthread_mutex_init(&root->tail_lock, NULL);
+
+// 	root->divider = NULL;
+// 	root->head = root->divider;
+// 	root->tail = root->divider;
+// 	return root;
+// }
+
+
+// // void INIT_QUEUE_HEAD(struct queue_head *head)
+// // {
+// // 	head->next = QUEUE_POISON1;
+// // }
+
+
+//  void queue_put(Queue *queue, void *item)
+// {
+// 	// new->next = NULL;
+
+// 	pthread_mutex_lock(&queue->tail_lock);
+// 	queue->tail = (Queue*)item;
+// 	pthread_mutex_unlock(&queue->tail_lock);
+// }
+
+
+// void *queue_get(Queue *queue)
+// {
+// 	Queue *head, *next = NULL;
+
+	// while (1) {
+	// 	pthread_mutex_lock(&queue->head_lock);
+	// 	head = queue->head;
+	// 	// next = head->next;
+	// 	if (next == NULL) {
+	// 		pthread_mutex_unlock(&queue->head_lock);
+	// 		return NULL;
+	// 	}
+	// 	queue->head = next;
+	// 	pthread_mutex_unlock(&queue->head_lock);
+		
+	// 	if (head == queue->divider) {
+	// 		queue_put(head, queue);
+	// 		continue;
+	// 	}
+
+		// queue->head = QUEUE_POISON1;
+	// }
+// }

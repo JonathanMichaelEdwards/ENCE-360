@@ -108,8 +108,11 @@ int main()
     enqueue(queue, 100); 
     enqueue(queue, 60);
     dequeue(queue);
-     
+
     printQueue(queue);
+
+	free(queue->store);
+	free(queue);
 
 
 	exit(EXIT_SUCCESS); 
