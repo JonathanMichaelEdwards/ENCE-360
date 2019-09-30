@@ -22,14 +22,19 @@
  * but it is hidden from the outside.
  */
 typedef struct QueueStruct {
-    sem_t read;
-    sem_t write;
-    pthread_mutex_t lock;
+    // sem_t read;
+    // sem_t write;
+    // pthread_mutex_t lock;
     
-    pthread_mutex_t head_lock;
+    // pthread_mutex_t head_lock;
 
-    struct QueueStruct *next;
+    // struct QueueStruct *next;
+    // void *value;
+
     void *value;
+    struct QueueStruct *front;
+    struct QueueStruct *rear;
+    struct QueueStruct *next;
 } Queue;
 
 
@@ -41,10 +46,10 @@ typedef struct QueueStruct {
 Queue *queue_alloc(int size) 
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
-    queue->next = (Queue*)malloc(sizeof(Queue) * size);
+    queue->front = queue->rear = NULL;
 
-    pthread_mutex_init(&queue->lock, NULL);
-    sem_init(&queue->read, 0, 0);
+    // pthread_mutex_init(&queue->lock, NULL);
+    // sem_init(&queue->read, 0, 0);
     // // sem_init(&queue->write, 0, 1);
 
     return queue;
@@ -103,6 +108,17 @@ void queue_put(Queue *queue, void *item)
     // pthread_mutex_unlock(&queue->lock);
     // sem_post(&queue->write);
 
+    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
+
+    queue_->value = item;
+    queue_->next = NULL;
+
+    if (queue->rear == NULL) {
+        queue->front = queue->rear = queue_;
+    } else {
+        queue->rear->next = queue_;
+        queue->rear = queue_;
+    }
 }
 
 
@@ -119,17 +135,24 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    void *item = malloc(sizeof(queue));
+    void *item = malloc(sizeof(void));
     // void *item = 0;
 
     // Queue *head, *next; 
     // // sem_wait(&queue->read);
     
-    int sum = 10;
+    // int sum = 10;
+    // queue->front = queue->front->next;
+    // item = queue->front->value;
 
-    item = (int*)&sum;
+    // queue_put(queue, item);
+    // item = (int*)&sum;
+    int b = 10;
+    int *a = &b;
+    item = (void*)a;
 
-    // printf("%p\n", item);
+    
+    // printf("%d\n", *(int*)item);
     // queue_put(queue, &item);
     
     // // pthread_mutex_lock(&queue->lock);
