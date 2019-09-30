@@ -15,6 +15,23 @@
 #include <malloc.h>
 
 
+
+void concatMessage()
+{
+    char *message1 = "Hello";
+    char *message2 = " Jonathan";
+
+    char *name = malloc(sizeof(char) * strlen(message1));  // initial
+    memcpy(name, message1, 5);  // copy the first message
+
+    name = realloc(name, sizeof(char) * 16);
+
+    memcpy(&name[5], message2, 9);  // concaternate the second message with the first
+
+    puts(name);
+}
+
+
 // Concaternating extra characters by reallocating memory
 void addOn(const char *message_1, const char *message_2, char *text)
 {
@@ -83,6 +100,7 @@ int main()
     singleInt(luckyNumber, &value);
     doubleInt(luckyNumber, &value_2);
     _value_2 = *value_2;
+    concatMessage();  
 
     puts(cpyText_1);
     puts(cpyText_2);

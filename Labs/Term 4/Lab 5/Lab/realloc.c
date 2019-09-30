@@ -30,7 +30,7 @@ typedef struct {
  
 Buffer *new_buffer(size_t reserved) 
 {
-    Buffer *resBuff = (Buffer*)malloc(sizeof(Buffer*) * reserved);
+    Buffer *resBuff = (Buffer*)malloc(sizeof(Buffer) * reserved);
 
     resBuff->data = malloc(reserved);
     resBuff->reserved = reserved;
@@ -64,7 +64,7 @@ void append_buffer(Buffer *buffer, char *data, size_t length)
     	buffer->data = realloc(buffer->data, buffer->reserved);
 	}
 
-    memcpy(buffer->data+buffer->length, data, length);
+  memcpy(buffer->data+buffer->length, data, length);
 	buffer->length += length;
 
     // assert(0 && "not implemented");
