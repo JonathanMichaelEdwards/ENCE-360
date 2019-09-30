@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+
 #define TRUE 1
 #define FALSE 0
 #define FULL 10
@@ -7,7 +9,10 @@
 
 
 typedef struct queue {
-    int data;
+    pthread_mutex_t lockTail;
+    pthread_mutex_t lockHead;
+
+    void *value;
     struct queue *front;
     struct queue *rear;
     struct queue *next;
@@ -15,17 +20,30 @@ typedef struct queue {
 
 
 
-void initialize(Queue *queue)
+Queue *queue_alloc(int size) 
 {
-    queue->front = queue->rear = NULL;
+    Queue *queue = (Queue*)malloc(sizeof(Queue) * size);
+
+    queue->next = queue;
+    queue->front = queue;
+    queue->rear = queue;
+    queue->value = malloc(sizeof(void));
+
+    pthread_mutex_init(&queue->lockHead, NULL);
+    pthread_mutex_init(&queue->lockTail, NULL);
+
+
+    return queue;
 }
 
 
-void enqueue(Queue *queue, int value)
+void enqueue(Queue *queue, void *value)
 {
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
-    queue_->data = value;
+    pthread_mutex_lock(&queue->lockHead);
+
+    queue_->value = value;
     queue_->next = NULL;
 
     if (queue->rear == NULL) {
@@ -34,6 +52,8 @@ void enqueue(Queue *queue, int value)
         queue->rear->next = queue_;
         queue->rear = queue_;
     }
+
+    pthread_mutex_unlock(&queue->lockHead);
 }
 
 
@@ -49,28 +69,12 @@ void dequeue(Queue *queue)
 void printList(Queue *list)
 {
     while (list != NULL) {
-        printf("%d", list->data);
+        printf("%d", *(int*)list->value);
         if(list->next != NULL) printf(", ");
         list = list->next;
     }
     puts("");
 }
-
-
-// void freeList(Queue *list) 
-// {
-//     // Free the malloced ptr value 
-//     // free(list->next);  // do this once
-
-//     // Free the malloced ptr next
-//     while (list != NULL) {  // freeing each space in the linked list
-//         // Queue *next = list->next;
-//         printf("%d ", list->data);
-//         // free(list);
-//         // list = next;
-//         list = list->next;
-//     }
-// }
 
 
 void free_list(Queue *list) {
@@ -82,9 +86,6 @@ void free_list(Queue *list) {
         l = next;
     }
 }
-
-
-
 
 
 void *queue_get(Queue *queue) 
@@ -122,29 +123,32 @@ void test()
 }
 
 
+// gcc -g -Wall -std=gnu99 queueLinked.c -o queueLinked && ./queueLinked
 void test2()
 {
     //// queue.c
-    Queue *queue = (Queue*)malloc(sizeof(Queue));
-    initialize(queue);
+    Queue *queue = queue_alloc(12);
+
+    printf("%d\n", *(int*)queue->value);
     
-    enqueue(queue, 10);
-    enqueue(queue, 20);
-    enqueue(queue, 50);
-    printList(queue->front);
-    dequeue(queue);
-    printList(queue->front);
+    // enqueue(queue, 10);
+    // enqueue(queue, 20);
+    // enqueue(queue, 50);
+    // printList(queue->front);
+    // dequeue(queue);
+    // printList(queue->front);
 
-    void *item = (void*)&queue->front->data;
-    ///
+    // void *item = (void*)&queue->front->data;
+    // ///
 
-    // queue_test.c
-    Task *task = (Task*)item;
-    printf("%d\n", task->value);  // 10 is outputted
+    // // queue_test.c
+    // Task *task = (Task*)item;
+    // printf("%d\n", task->value);  // 10 is outputted
 
-    free(task);  
-    free_list(queue->front);
-    free(queue);
+    // // free(task);  
+    // // free(queue->front);
+    // free_list(queue->front);
+    // free(queue);
     //
 }
 

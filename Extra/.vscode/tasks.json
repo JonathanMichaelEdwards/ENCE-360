@@ -8,8 +8,10 @@
             "label": "gcc build active file",
             "command": "/usr/bin/gcc",
             "args": [
-                "-g",
+                "--std=gnu99",
+                "-Wall",
                 "${file}",
+                "-g",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-lpthread"
