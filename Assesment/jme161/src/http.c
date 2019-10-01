@@ -13,7 +13,7 @@
 #define HANDLE_ERROR(msg) \
         do { puts("Error: "msg); exit(EXIT_FAILURE); } while(0)
 
-#define HEADER(PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", PAGE, HOST);
+#define HEADER(header, PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", PAGE, HOST);
 
 #define RANGE_LIMIT 500
 #define EMPTY_HEADER_SIZE 31
@@ -51,6 +51,7 @@ void readBytes(int sockfd, Buffer *buffer)
 {
     size_t bytes = 0;
 
+    // FIX ME !!!
     while ((bytes = read(sockfd, (void*)&buffer->data[buffer->length], BUF_SIZE)) > 0) {
         buffer->length += bytes;
         buffer->data = realloc(buffer->data, (buffer->length+BUF_SIZE));
@@ -100,7 +101,7 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     if (rc == EOF) HANDLE_ERROR("connect");
 
     // Formatting the header
-    HEADER(page, host);
+    HEADER(header, page, host);
     
     // Write and read N bytes of header data to FD
     write(sockfd, header, strlen(header));

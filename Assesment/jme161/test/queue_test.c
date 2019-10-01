@@ -17,6 +17,7 @@ typedef struct {
 void *doSum(void *arg) {
     int sum = 0;
     Queue *queue = (Queue*)arg;
+    puts("im here");
     Task *task = (Task*)queue_get(queue);
 
     while (task) {
@@ -47,7 +48,7 @@ int main(int argc, char **argv) {
         task->value = i;
 
         queue_put(queue, task);
-        puts("waiting");
+        // puts("waiting");
         expected += i;
     }
 
@@ -62,7 +63,7 @@ int main(int argc, char **argv) {
         sum += value;
     }
 
-    // queue_free(queue);
+    queue_free(queue);
 
     printf("total sum: %d, expected sum: %d\n", (int)sum, expected);
 

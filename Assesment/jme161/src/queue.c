@@ -22,8 +22,9 @@
  * but it is hidden from the outside.
  */
 typedef struct QueueStruct {
-    sem_t read;
-    sem_t write;
+    sem_t mutex;
+    sem_t items;
+    sem_t spaces;
 
     pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
@@ -35,6 +36,8 @@ typedef struct QueueStruct {
     struct QueueStruct *tail;
 
     void *value;
+    int size;
+    int count;
     struct QueueStruct *front;
     struct QueueStruct *rear;
     struct QueueStruct *next;
@@ -52,6 +55,8 @@ Queue *queue_alloc(int size)
     queue->next = queue;
     queue->front = queue;
     queue->rear = queue;
+    queue->size = size;
+    queue->count = 0;
     queue->value = malloc(sizeof(void));
 
     // queue->front = queue->rear = queue->next = NULL;
@@ -60,8 +65,9 @@ Queue *queue_alloc(int size)
     pthread_mutex_init(&queue->lockHead, NULL);
     pthread_mutex_init(&queue->lockTail, NULL);
 
-    sem_init(&queue->read, 0, 0);
-    sem_init(&queue->write, 0, 1);
+    sem_init(&queue->mutex, 0, 1);
+    sem_init(&queue->items, 0, 0);
+    sem_init(&queue->spaces, 0, size-1); 
 
     return queue;
 }
@@ -110,11 +116,17 @@ void queue_put(Queue *queue, void *item)
 {   
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
-    pthread_mutex_lock(&queue->lockTail);
-    sem_wait(&queue->write);
+    
 
+    sem_wait(&queue->spaces);
+    // sem_wait(&queue->mutex);
+    pthread_mutex_lock(&queue->lockTail);
+    
     queue_->value = item;
     queue_->next = NULL;
+    queue_->size = queue->count;
+
+    if (queue->count > queue->size) { sem_post(&queue->items); return; }
 
     if (queue->rear == NULL) {
         queue->front = queue->rear = queue_;
@@ -122,9 +134,13 @@ void queue_put(Queue *queue, void *item)
         queue->rear->next = queue_;
         queue->rear = queue_;
     }
+    printf("Hello the size:   %d\n", queue->count);
+    queue->count++;
 
-    sem_post(&queue->read);
     pthread_mutex_unlock(&queue->lockTail);
+
+    // sem_post(&queue->mutex);
+    sem_post(&queue->items);
 }
 
 
@@ -139,21 +155,33 @@ void queue_put(Queue *queue, void *item)
  * @return item - item retrieved from queue. void* type since it can be 
  *                arbitrary 
  */
+///// Need to signal to quit
 void *queue_get(Queue *queue) 
 {
     Queue *queue_ = queue->front;
 
     // wait for an update from one of the threads
-    sem_wait(&queue->read);
+    // sem_wait(&queue->items);
+    // sem_wait(&queue->mutex);
 
-    // if (queue->next =! NULL) puts("yes");
+    // if (queue == NULL) return NULL;
 
-    queue->front = queue->front->next;
-    void *item = (void*)&queue->front->value;
-    free(queue_);
+    if (queue->count > queue->size) return NULL;
+
+    sem_wait(&queue->items);
+    pthread_mutex_lock(&queue->lockTail);
+    // queue->front = queue->front->next;
+    // void *item = (void*)&queue->front->value;
+    // free(queue_);
+    puts("its me");
+    void *item = 0;
+
 
     // signal to any threads waiting that they can send another update
-    sem_post(&queue->write);
+    // sem_post(&queue->mutex);
+    pthread_mutex_unlock(&queue->lockTail);
+    sem_post(&queue->spaces);
+    // sem_post(&queue->spaces);
     
 
     return item;
