@@ -41,7 +41,6 @@ int main(int argc, char **argv) {
         pthread_create(&thread[i], NULL, doSum, queue);
     }
 
-
     int expected = 0;
     for (i = 0; i < N; ++i) {
         Task *task = (Task*)malloc(sizeof(Task));

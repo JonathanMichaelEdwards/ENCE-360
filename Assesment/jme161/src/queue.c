@@ -111,20 +111,20 @@ void queue_put(Queue *queue, void *item)
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
     pthread_mutex_lock(&queue->lockTail);
-    // sem_wait(&queue->read);
+    sem_wait(&queue->write);
 
     queue_->value = item;
     queue_->next = NULL;
 
     if (queue->rear == NULL) {
         queue->front = queue->rear = queue_;
-        return;
+    } else {
+        queue->rear->next = queue_;
+        queue->rear = queue_;
     }
-    queue->rear->next = queue_;
-    queue->rear = queue_;
 
+    sem_post(&queue->read);
     pthread_mutex_unlock(&queue->lockTail);
-    // sem_post(&queue->write);
 }
 
 
@@ -144,47 +144,20 @@ void *queue_get(Queue *queue)
     Queue *queue_ = queue->front;
 
     // wait for an update from one of the threads
-    sem_wait(&queue->write);
+    sem_wait(&queue->read);
 
-    if (queue->next != NULL) puts("yes");
+    // if (queue->next =! NULL) puts("yes");
 
     queue->front = queue->front->next;
     void *item = (void*)&queue->front->value;
-    printf("%d\n", *(int*)item);
     free(queue_);
 
     // signal to any threads waiting that they can send another update
-    sem_post(&queue->read);
+    sem_post(&queue->write);
     
 
     return item;
 }
-
-
-
-    // int finished = 0;
-    // while (finished < NUM_THREADS) {
-    //     // The consumer
-    //     void *message = NULL;
-
-    //     // wait for an update from one of the threads
-    //     sem_wait(&queue->read);
-
-    //     // read the variable
-    //     message = queue->value;
-    //     queue->value = NULL;
-
-    //     // signal to any threads waiting that they can send another update
-    //     sem_post(&queue->write);
-
-    //     if (message) {
-    //         printf("recieved: %s\n", message);
-    //     }
-    //     else {
-    //         // Another worker has finished
-    //         finished++;
-    //     }
-    // }
 
 
 
