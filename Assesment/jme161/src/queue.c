@@ -67,7 +67,8 @@ Queue *queue_alloc(int size)
 
     sem_init(&queue->mutex, 0, 1);
     sem_init(&queue->items, 0, 0);
-    sem_init(&queue->spaces, 0, size-1); 
+    // sem_init(&queue->spaces, 0, size-1); 
+    sem_init(&queue->spaces, 0, 1); 
 
     return queue;
 }
@@ -116,8 +117,6 @@ void queue_put(Queue *queue, void *item)
 {   
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
-    
-
     sem_wait(&queue->spaces);
     // sem_wait(&queue->mutex);
     pthread_mutex_lock(&queue->lockTail);
@@ -127,6 +126,7 @@ void queue_put(Queue *queue, void *item)
     queue_->size = queue->count;
 
     if (queue->count > queue->size) { sem_post(&queue->items); return; }
+
 
     if (queue->rear == NULL) {
         queue->front = queue->rear = queue_;
@@ -161,25 +161,27 @@ void *queue_get(Queue *queue)
     Queue *queue_ = queue->front;
 
     // wait for an update from one of the threads
-    // sem_wait(&queue->items);
+    sem_wait(&queue->items);
     // sem_wait(&queue->mutex);
 
     // if (queue == NULL) return NULL;
 
-    if (queue->count > queue->size) return NULL;
-
-    sem_wait(&queue->items);
-    pthread_mutex_lock(&queue->lockTail);
-    // queue->front = queue->front->next;
+    // if (queue->count > queue->size) return NULL;
+    // return NULL;
+    
+    // sem_wait(&queue->items);
+    // pthread_mutex_lock(&queue->lockTail);
+    // // queue->front = queue->front->next;
     // void *item = (void*)&queue->front->value;
     // free(queue_);
     puts("its me");
     void *item = 0;
+    return NULL;
 
 
     // signal to any threads waiting that they can send another update
     // sem_post(&queue->mutex);
-    pthread_mutex_unlock(&queue->lockTail);
+    // pthread_mutex_unlock(&queue->lockTail);
     sem_post(&queue->spaces);
     // sem_post(&queue->spaces);
     
