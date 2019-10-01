@@ -24,13 +24,13 @@ Queue *queue_alloc(int size)
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue) * size);
 
-    queue->next = queue;
-    queue->front = queue;
-    queue->rear = queue;
+    queue->next = NULL;
+    queue->front = NULL;
+    queue->rear = NULL;
     queue->value = malloc(sizeof(void));
 
-    pthread_mutex_init(&queue->lockHead, NULL);
-    pthread_mutex_init(&queue->lockTail, NULL);
+    // pthread_mutex_init(&queue->lockHead, NULL);
+    // pthread_mutex_init(&queue->lockTail, NULL);
 
 
     return queue;
@@ -41,7 +41,7 @@ void enqueue(Queue *queue, void *value)
 {
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
-    pthread_mutex_lock(&queue->lockHead);
+    // pthread_mutex_lock(&queue->lockHead);
 
     queue_->value = value;
     queue_->next = NULL;
@@ -53,7 +53,7 @@ void enqueue(Queue *queue, void *value)
         queue->rear = queue_;
     }
 
-    pthread_mutex_unlock(&queue->lockHead);
+    // pthread_mutex_unlock(&queue->lockHead);
 }
 
 
@@ -155,47 +155,22 @@ void test2()
 
 int main()
 {
-    // Queue *queue = malloc(sizeof(Queue));
-    // Queue *tmp = queue;
+    Queue *queue = queue_alloc(12);
 
-    // initialize(queue);
-    // tmp = enqueue(queue, 10);
-    // tmp = enqueue(queue, 20);
-    // tmp = enqueue(queue, 30);
-    // printf("Queue before dequeue\n");
-    // printList(queue->front);
-    // dequeue(queue);
-    // printf("Queue after dequeue\n");
-    // printList(queue->front);
+    int a = 10;
+    int b = 20;
+
+    enqueue(queue, (void*)&a);
+    enqueue(queue, (void*)&b);
+    enqueue(queue, (void*)&a);
+    printf("Queue before dequeue\n");
+    printList(queue->front);
+    dequeue(queue);
+    printf("Queue after dequeue\n");
+    printList(queue->front);
 
     // free(queue);
-    // free(tmp->next);
     // free_list(queue);
-
-    // int sum = 0;
-    // Queue *queue = (Queue*)malloc(sizeof(Queue));
-
-    // void *item = malloc(1000);
-
-    // int b = 10;
-    // int *a = &b;
-    // item = (void*)a;
-
-    // // Task *task = (Task*)queue_get(queue);
-    // Task *task = (Task*)item;
-
-    // printf("%d\n", task->value);
-    // // while (task) {
-    // //     sum += task->value;
-    // //     // printf("%d\n", sum);
-    // //     free(task);
-
-    // //     task = (Task*)queue_get(queue);
-    // // }
-    // free(task);
-
-    // test();
-    test2();
     
 
     return EXIT_SUCCESS;

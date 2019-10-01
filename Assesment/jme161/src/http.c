@@ -26,9 +26,10 @@
  */
 void clear(int sockfd, char *usrPort, char *header)
 {
-    close(sockfd);
+    
     free(usrPort);
     free(header);
+    close(sockfd);
 }
 
 
