@@ -97,8 +97,8 @@ void free_list(Queue *list)
  */
 void queue_free(Queue *queue) 
 {
-    free_list(queue->front);
-    free(queue);
+    // free_list(queue->front);
+    // free(queue);
 }
 
 
@@ -113,33 +113,36 @@ void queue_free(Queue *queue)
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
+
+int a = 0;
+
+
 void queue_put(Queue *queue, void *item) 
 {   
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
+    // Invalid free() error fix !!!
+    // Queue *queue_ = (Queue*)malloc(sizeof(Queue));
+
+    if (a > queue->size) return;
 
     sem_wait(&queue->spaces);
-    // sem_wait(&queue->mutex);
     pthread_mutex_lock(&queue->lockTail);
     
-    queue_->value = item;
-    queue_->next = NULL;
-    queue_->size = queue->count;
+    // queue_->value = item;
+    // queue_->next = NULL;
+    // queue_->size = queue->count;
 
-    if (queue->count > queue->size) { sem_post(&queue->items); return; }
-
-
-    if (queue->rear == NULL) {
-        queue->front = queue->rear = queue_;
-    } else {
-        queue->rear->next = queue_;
-        queue->rear = queue_;
-    }
-    printf("Hello the size:   %d\n", queue->count);
-    queue->count++;
+    puts("In Puts");
+    a++;
+    // if (queue->rear == NULL) {
+    //     queue->front = queue->rear = queue_;
+    // } else {
+    //     queue->rear->next = queue_;
+    //     queue->rear = queue_;
+    // }
+    // printf("Hello the size:   %d\n", queue->count);
+    // queue->count++;
 
     pthread_mutex_unlock(&queue->lockTail);
-
-    // sem_post(&queue->mutex);
     sem_post(&queue->items);
 }
 
@@ -158,33 +161,27 @@ void queue_put(Queue *queue, void *item)
 ///// Need to signal to quit
 void *queue_get(Queue *queue) 
 {
-    Queue *queue_ = queue->front;
+    if (a > queue->size) return NULL;
+    void *item = 0;
 
-    // wait for an update from one of the threads
     sem_wait(&queue->items);
-    // sem_wait(&queue->mutex);
+    pthread_mutex_lock(&queue->lockHead);
 
-    // if (queue == NULL) return NULL;
+    // Queue *queue_ = queue->front;
 
-    // if (queue->count > queue->size) return NULL;
-    // return NULL;
-    
-    // sem_wait(&queue->items);
-    // pthread_mutex_lock(&queue->lockTail);
-    // // queue->front = queue->front->next;
+    // queue->front = queue->front->next;
     // void *item = (void*)&queue->front->value;
     // free(queue_);
-    puts("its me");
-    void *item = 0;
-    return NULL;
-
-
-    // signal to any threads waiting that they can send another update
-    // sem_post(&queue->mutex);
-    // pthread_mutex_unlock(&queue->lockTail);
-    sem_post(&queue->spaces);
-    // sem_post(&queue->spaces);
+    // printf("%d\n", *(int*)queue->front->value);
     
+    puts("In Gets");
+    // printf("%d\n", *(int*)queue->front->value);
+
+
+    pthread_mutex_unlock(&queue->lockHead);
+    sem_post(&queue->spaces);
+
+    // if (queue->count > queue->size) return NULL;
 
     return item;
 }

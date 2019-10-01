@@ -17,9 +17,8 @@ typedef struct {
 void *doSum(void *arg) {
     int sum = 0;
     Queue *queue = (Queue*)arg;
-    puts("im here");
+    puts("getting ready");
     Task *task = (Task*)queue_get(queue);
-
     while (task) {
         sum += task->value;
         free(task);
@@ -46,22 +45,25 @@ int main(int argc, char **argv) {
     for (i = 0; i < N; ++i) {
         Task *task = (Task*)malloc(sizeof(Task));
         task->value = i;
-
+        
         queue_put(queue, task);
-        // puts("waiting");
+        
         expected += i;
     }
 
+    
     for (i = 0; i < NUM_THREADS; ++i) {
         queue_put(queue, NULL);
     }
 
+    
     intptr_t value;
     sum = 0;
     for (i = 0; i < NUM_THREADS; ++i) {
         pthread_join(thread[i], (void**)&value);
         sum += value;
     }
+    
 
     queue_free(queue);
 
