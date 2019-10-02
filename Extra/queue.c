@@ -18,7 +18,7 @@ typedef struct {
 Queue *createQueue(int capacity) 
 { 
 	Queue *queue = (Queue*)malloc(sizeof(Queue)); 
-	queue->store = (int*)malloc(sizeof(int) * capacity); 
+	queue->store = (int*)malloc(sizeof(queue->store) * capacity); 
     queue->head = queue->tail = queue->size = 0; 
 
 	return queue; 
@@ -96,6 +96,7 @@ void printQueue(Queue *queue)
 }
 
 
+// gcc -std=c99 -Werror -Wall -g queue.c -o queue -lpthread && valgrind ./queue
 int main() 
 { 
 	Queue *queue = createQueue(CAPACITY); 

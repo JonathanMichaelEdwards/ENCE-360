@@ -18,7 +18,7 @@ int client_socket(char *hostname)
   struct addrinfo *their_addr = NULL; // connector's address information  
   
   /////////////////////////
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  
 
   memset(&their_addrinfo, 0, sizeof(struct addrinfo));
   their_addrinfo.ai_family = AF_INET;        /* use an internet address */
@@ -27,7 +27,14 @@ int client_socket(char *hostname)
   sprintf(port, "%d", SERVER_PORT);
   getaddrinfo( hostname, port, &their_addrinfo, &their_addr);/* get IP info */
 
-  int rc = connect(sockfd, their_addr->ai_addr, their_addr->ai_addrlen); //connect to server
+  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd == -1) {
+    perror("connect");
+    exit(1);
+  }
+
+  
+  int rc = connect(sockfd, their_addr->ai_addr, their_addr->ai_addrlen);  //connect to server
   if(rc == -1) {
     perror("connect");
     exit(1);

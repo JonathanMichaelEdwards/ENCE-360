@@ -24,11 +24,12 @@
 /**
  * Close the socket and free memory.
  */
-void clear(int sockfd, char *usrPort, char *header)
+void clear(int sockfd, char *usrPort, char *header, struct addrinfo *addr)
 {
     
     free(usrPort);
     free(header);
+    freeaddrinfo(addr);
     close(sockfd);
 }
 
@@ -106,7 +107,7 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     // Write and read N bytes of header data to FD
     write(sockfd, header, strlen(header));
     readBytes(sockfd, buffer);
-    clear(sockfd, usrPort, header);  // Close socket and free memory
+    clear(sockfd, usrPort, header, addr);  // Close socket and free memory
 
     return buffer;
 }

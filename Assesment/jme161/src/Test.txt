@@ -1,11 +1,11 @@
 # Part 1:
 ./http_test www.example.com index.html
 ./test_download.sh www.example.com/index.html
-
-./http_test www.thomas-bayer.com sqlrest/CUSTOMER/3/
+                                                                  # for valgrind ...
+./http_test www.thomas-bayer.com sqlrest/CUSTOMER/3/              # Gives me 'Conditional jump or move depends on uninitialised value(s)'
 ./test_download.sh www.thomas-bayer.com/sqlrest/CUSTOMER/3/
 
-./http_test static.canterbury.ac.nz web/graphics/blacklogo.png
+./http_test static.canterbury.ac.nz web/graphics/blacklogo.png    # no errorr
 ./test_download.sh static.canterbury.ac.nz/web/graphics/blacklogo.png
 
 ./http_test www.cosc.canterbury.ac.nz research/reports/PhdTheses/2015/phd_1501.pdf
