@@ -147,8 +147,8 @@ void *queue_get(Queue *queue)
     // pthread_mutex_lock(&queue->lockHead);
 
     
-    // void *item = (void*)&queue->store[queue->head++]; 
-    void *item = 0; 
+    void *item = (void*)&queue->store[queue->head++]; 
+    // void *item = 0; 
 
     // printf("we got %d\n", *(int*)item);
     queue->size += 1;
