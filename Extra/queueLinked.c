@@ -13,6 +13,7 @@ typedef struct queue {
     pthread_mutex_t lockHead;
 
     void *value;
+    int size;
     struct queue *front;
     struct queue *rear;
     struct queue *next;
@@ -28,6 +29,7 @@ Queue *queue_alloc(int size)
     queue->front = NULL;
     queue->rear = NULL;
     queue->value = malloc(sizeof(void));
+    queue->size = 0;
 
     // pthread_mutex_init(&queue->lockHead, NULL);
     // pthread_mutex_init(&queue->lockTail, NULL);
@@ -52,17 +54,23 @@ void enqueue(Queue *queue, void *value)
         queue->rear->next = queue_;
         queue->rear = queue_;
     }
-
+    queue->size++;
     // pthread_mutex_unlock(&queue->lockHead);
 }
 
 
 void dequeue(Queue *queue)
 {
-    Queue *queue_ = queue->front;
+    //Queue *queue_ = queue->front;
 
-    queue->front = queue->front->next;
-    free(queue_);
+    
+    // while (queue->front->next != NULL) {
+    if (queue->size > 0) {
+        queue->front = queue->front->next;
+        queue = queue->next;
+    }
+        // break;
+    // }
 }
 
 
@@ -155,23 +163,27 @@ void test2()
 
 int main()
 {
-    Queue *queue = queue_alloc(12);
+    // Queue *queue = queue_alloc(12);
 
-    int a = 10;
-    int b = 20;
+    // int a = 10;
+    // int b = 20;
 
-    enqueue(queue, (void*)&a);
-    enqueue(queue, (void*)&b);
-    enqueue(queue, (void*)&a);
-    printf("Queue before dequeue\n");
-    printList(queue->front);
-    dequeue(queue);
-    printf("Queue after dequeue\n");
-    printList(queue->front);
 
-    // free(queue);
+    // dequeue(queue);
+    // enqueue(queue, (void*)&a);
+    // enqueue(queue, (void*)&b);
+    // enqueue(queue, (void*)&a);
+    // printf("Queue before dequeue\n");
+    // printList(queue->front);
+    // dequeue(queue);
+    // printf("Queue after dequeue\n");
+    // printList(queue->front);
+
+    // free(queue->value);
     // free_list(queue);
-    
+    puts("hello");
+    for (int i = 0; i < 10000000000; i++);
+    puts("done");
 
     return EXIT_SUCCESS;
 }

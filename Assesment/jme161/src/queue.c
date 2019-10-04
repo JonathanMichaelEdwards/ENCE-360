@@ -29,11 +29,11 @@ typedef struct QueueStruct {
     pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
 
-//     void *value;
-//     int count;
-
-	int head, tail, size; 
-	int *store; 
+    void *value;
+    int size;
+    struct QueueStruct *front;
+    struct QueueStruct *rear;
+    struct QueueStruct *next;
 } Queue;
 
 
@@ -44,12 +44,12 @@ typedef struct QueueStruct {
  */
 Queue *queue_alloc(int size) 
 {
-	Queue *queue = (Queue*)malloc(sizeof(Queue)); 
-	queue->store = (int*)malloc(sizeof(queue->store) * size); 
-    queue->head = queue->tail = queue->size = 0; 
-
-    // queue->front = queue->rear = queue->next = NULL;
-    // queue->value = 0;
+    Queue *queue = (Queue*)malloc(sizeof(Queue));
+    queue->next = NULL;
+    queue->front = NULL;
+    queue->rear = NULL;
+    queue->value = malloc(sizeof(void));
+    queue->size = 0;
 
     pthread_mutex_init(&queue->lockHead, NULL);
     pthread_mutex_init(&queue->lockTail, NULL);
@@ -87,8 +87,8 @@ Queue *queue_alloc(int size)
 void queue_free(Queue *queue) 
 {
     // free_list(queue->front);
-    free(queue->store);
-    free(queue);
+    // free(queue->store);
+    // free(queue);
 }
 
 
@@ -109,15 +109,29 @@ int a = 0;
 
 void queue_put(Queue *queue, void *item) 
 {   
-    if (a > 16) return;
+    // if (a > 16) return;
 
     sem_wait(&queue->write);
     pthread_mutex_lock(&queue->lockTail);
+
+    
+    
+    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
+
+    queue_->value = item;
+    queue_->next = NULL;
+    
+    if (queue->rear == NULL) {
+        queue->front = queue->rear = queue_;
+    } else {
+        queue->rear->next = queue_;
+        queue->rear = queue_;
+    }
+
+    queue->size++;
     
 
-	queue->store[queue->tail++] = *(int*)item; 
-	queue->size += 1; 
-    a++;
+    // printf("%d\n", *(int*)queue->rear->value);
 
 
     pthread_mutex_unlock(&queue->lockTail);
@@ -144,17 +158,35 @@ void *queue_get(Queue *queue)
     // if (a > queue->size) return NULL;
 
     sem_wait(&queue->read);
-    // pthread_mutex_lock(&queue->lockHead);
+    // pthread_mutex_lock(&queue->lockTail);
 
+    // Queue *queue_ = queue->front;
+
+    // if (queue->rear == NULL) return;
+
+    void *item = malloc(sizeof(void));
+
+    printf("%d\n", queue->size);
+
+    if (queue->size > 0) {
+        
+        item = queue->value;
+        queue->front = queue->front->next;
+        queue = queue->next;
+        
+        // return item;
+        printf("%d\n", *(int*)item);
+        sem_post(&queue->write);
+    }
     
-    void *item = (void*)&queue->store[queue->head++]; 
-    // void *item = 0; 
 
-    // printf("we got %d\n", *(int*)item);
-    queue->size += 1;
+    // printf("%d\n", *(int*)queue->value);
+    // item = queue->front->value;
+    // queue->front = queue->front->next;
+    // free(queue_);
 
 
-    // pthread_mutex_unlock(&queue->lockHead);
+    // pthread_mutex_unlock(&queue->lockTail);
     sem_post(&queue->write);
 
     // if (queue->count > queue->size) return NULL;

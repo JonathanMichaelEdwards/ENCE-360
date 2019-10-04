@@ -154,10 +154,10 @@ int square(int x) {
 int main() {
 
     struct Link *fib = fibonacci(10);
-    struct Link *fib_sq = map_list(fib, square);  
+    struct Link *fib_sq = map_list(fib, square); 
 
-      // print out our list of fibonacci^2 (in reverse)
-      // 1, 1, 4, 9, 25, 64, 169, 441, 1156, 3025
+    // print out our list of fibonacci^2 (in reverse)
+    // 1, 1, 4, 9, 25, 64, 169, 441, 1156, 3025
     print_list(fib_sq);
     print_list(fib);
 
