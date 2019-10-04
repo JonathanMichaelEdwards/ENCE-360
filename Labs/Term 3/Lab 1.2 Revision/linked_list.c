@@ -141,7 +141,7 @@ struct Link *map_list(struct Link *fib, int ((*square)(int)))
 //
 //
 void free_list(struct Link *list)
- {
+{
     if (list == NULL)
         return;
 

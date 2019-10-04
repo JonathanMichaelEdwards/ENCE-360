@@ -80,13 +80,18 @@ void doubleInt(const int num, int **value)
     *value = (int*)&num;
 }
 
+char *initPtr(const char *message)
+{
+    char *me = (char*)malloc(sizeof(char) * strlen(message)+1);
+    return me;
+}
 
 int main()
 {
     const char *message = "Hello ";
     const int luckyNumber = 6;
 
-    char *cpyText_1 = (char*)malloc(sizeof(char) * strlen(message)+1);
+    char *cpyText_1 = initPtr(message);
     char *cpyText_2 = NULL;
     int value = 0;
     int *value_2 = 0;
