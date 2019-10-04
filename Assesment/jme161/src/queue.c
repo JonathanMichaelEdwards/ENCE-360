@@ -29,11 +29,14 @@ typedef struct QueueStruct {
     pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
 
-    void *value;
+    // void *value;
     int size;
-    struct QueueStruct *front;
-    struct QueueStruct *rear;
+    // struct QueueStruct *front;
+    // struct QueueStruct *rear;
+    // struct QueueStruct *next;
+
     struct QueueStruct *next;
+    void *value;
 } Queue;
 
 
@@ -46,10 +49,10 @@ Queue *queue_alloc(int size)
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
     queue->next = NULL;
-    queue->front = NULL;
-    queue->rear = NULL;
-    queue->value = malloc(sizeof(void));
-    queue->size = 0;
+    // queue->front = NULL;
+    // queue->rear = NULL;
+    // queue->value = malloc(sizeof(void));
+    // queue->size = 0;
 
     pthread_mutex_init(&queue->lockHead, NULL);
     pthread_mutex_init(&queue->lockTail, NULL);
@@ -114,19 +117,18 @@ void queue_put(Queue *queue, void *item)
     sem_wait(&queue->write);
     pthread_mutex_lock(&queue->lockTail);
 
+    // queue_->value = item;
+    // queue_->next = NULL;
     
-    
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
-
-    queue_->value = item;
-    queue_->next = NULL;
-    
-    if (queue->rear == NULL) {
-        queue->front = queue->rear = queue_;
-    } else {
-        queue->rear->next = queue_;
-        queue->rear = queue_;
-    }
+    // if (queue->rear == NULL) {
+    //     queue->front = queue->rear = queue_;
+    // } else {
+    //     queue->rear->next = queue_;
+    //     queue->rear = queue_;
+    // }
+    // struct Link *head_ = (struct Link*)malloc(sizeof(struct Link));
+    queue->next = NULL;
+    queue->value = item;
 
     queue->size++;
     
@@ -166,17 +168,16 @@ void *queue_get(Queue *queue)
 
     void *item = malloc(sizeof(void));
 
-    printf("%d\n", queue->size);
+    // printf("%d\n", queue->size);
 
     if (queue->size > 0) {
-        
+        // printf("%d\n", *(int*)(queue->value));
         item = queue->value;
-        queue->front = queue->front->next;
-        queue = queue->next;
+        // queue->front = queue->front->next;
+        // queue = queue->next;
         
-        // return item;
-        printf("%d\n", *(int*)item);
-        sem_post(&queue->write);
+        // // return item;
+        // printf("%d\n", *(int*)item);
     }
     
 
