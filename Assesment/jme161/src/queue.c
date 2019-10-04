@@ -142,11 +142,13 @@ void queue_put(Queue *queue, void *item)
 void *queue_get(Queue *queue) 
 {
     // if (a > queue->size) return NULL;
+    
 
     sem_wait(&queue->read);
     // pthread_mutex_lock(&queue->lockHead);
 
-    
+    if (queue->store == NULL) return NULL;
+
     void *item = (void*)&queue->store[queue->head++]; 
     // void *item = 0; 
 
