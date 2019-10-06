@@ -10,6 +10,7 @@
 typedef struct { 
 	int head, tail, size; 
 	int *store; 
+	void **value;
 } Queue; 
 
 
@@ -20,6 +21,7 @@ Queue *createQueue(int capacity)
 	Queue *queue = (Queue*)malloc(sizeof(Queue)); 
 	queue->store = (int*)malloc(sizeof(queue->store) * capacity); 
     queue->head = queue->tail = queue->size = 0; 
+	queue->value[12] = queue->value;
 
 	return queue; 
 } 
@@ -101,19 +103,21 @@ int main()
 { 
 	Queue *queue = createQueue(CAPACITY); 
 
-	enqueue(queue, 10); 
-	enqueue(queue, 20); 
-	enqueue(queue, 30); 
-	enqueue(queue, 40); 
-    dequeue(queue);
-    enqueue(queue, 100); 
-    enqueue(queue, 60);
-    dequeue(queue);
+	// enqueue(queue, 10); 
+	// enqueue(queue, 20); 
+	// enqueue(queue, 30); 
+	// enqueue(queue, 40); 
+    // dequeue(queue);
+    // enqueue(queue, 100); 
+    // enqueue(queue, 60);
+    // dequeue(queue);
 
-    printQueue(queue);
+    // printQueue(queue);
 
-	free(queue->store);
-	free(queue);
+	// free(queue->store);
+	// free(queue);
+	int a = 1;
+	queue->value[0] = (void*)&a;
 
 
 	exit(EXIT_SUCCESS); 

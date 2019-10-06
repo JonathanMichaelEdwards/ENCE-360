@@ -27,16 +27,14 @@ typedef struct QueueStruct {
 
     // pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
-
-    void *value;
+    void **value;
     int size;
     int capacity;
-    struct QueueStruct *front;
-    struct QueueStruct *rear;
-    struct QueueStruct *next;
 } Queue;
 
 
+void value[100];
+int size1 = 0;
 /**
  * Allocate a concurrent queue of a specific size
  * @param size   - The size of memory to allocate to the queue
@@ -45,11 +43,10 @@ typedef struct QueueStruct {
 Queue *queue_alloc(int size) 
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue) * size);
-    queue->next = NULL;
-    queue->front = NULL;
-    queue->rear = NULL;
     queue->capacity = size;
+    queue->value = queue->value[100];
     queue->size = 0;
+    // size1 = size;
 
     pthread_mutex_init(&queue->lockHead, NULL);
     // pthread_mutex_init(&queue->lockTail, NULL);
@@ -60,6 +57,7 @@ Queue *queue_alloc(int size)
     return queue;
 }
 
+// void value[10];
 
 
 /**
@@ -97,16 +95,10 @@ void queue_put(Queue *queue, void *item)
 
 
     // Block the queue if it is full
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
-    queue_->value = item;
-    queue_->next = NULL;
     
-    if (queue->rear == NULL) {
-        queue->front = queue->rear = queue_;
-    } else {
-        queue->rear->next = queue_;
-        queue->rear = queue_;
+    if (queue->size < queue->capacity) {
+
     }
 
     queue->size++;
@@ -138,17 +130,7 @@ void *queue_get(Queue *queue)
     // Block the queue if it is empty
     void *item = malloc(sizeof(void));
 
-    if (0 < queue->size && queue->size < queue->capacity) {  //&& queue->front->next != NULL
-        item = queue->value;
-        queue->front = queue->front->next;
-        // if (queue->next != NULL) {
-        queue = queue->next;
-        // }
-        puts("hi");
-        if (item != NULL) printf("%d\n", *(int*)item);
     
-    }
-    puts("bye"); 
 
     
 
