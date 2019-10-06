@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
     if (fp == NULL) {
         exit(EXIT_FAILURE);
     }
-
+    
     // spawn threads and create work queue(s)
     Context *context = spawn_workers(num_workers);
 

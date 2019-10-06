@@ -55,6 +55,8 @@ void enqueue(Queue *queue, void *value)
         queue->rear = queue_;
     }
     queue->size++;
+    // if (value != NULL) 
+    printf("Queuing: %d\n", *(int*)queue_->value);
     // pthread_mutex_unlock(&queue->lockHead);
 }
 
@@ -66,8 +68,12 @@ void dequeue(Queue *queue)
     
     // while (queue->front->next != NULL) {
     if (queue->size > 0) {
+        // if (queue->front != NULL) {
+
+        printf("dequeue: %d\n", *(int*)queue->front->value);
         queue->front = queue->front->next;
         queue = queue->next;
+        // }
     }
         // break;
     // }
@@ -96,94 +102,32 @@ void free_list(Queue *list) {
 }
 
 
-void *queue_get(Queue *queue) 
-{   
-    void *item = malloc(1000);
-
-    int b = 10;
-    int *a = &b;
-    item = (void*)a;
-
-    return item;
-}
-
-
-typedef struct {
-    int value;
-} Task;
-
-
-void test()
-{
-    //// queue.c
-    void *item = malloc(100);  // just setting sum space for this example
-
-    int b = 10;
-    item = (void*)&b;
-    ///
-
-    // queue_test.c
-    Task *task = (Task*)item;
-    printf("%d\n", task->value);  // 10 is outputted
-
-    free(task);  
-    //
-}
-
-
 // gcc -g -Wall -std=gnu99 queueLinked.c -o queueLinked && ./queueLinked
-void test2()
-{
-    //// queue.c
-    Queue *queue = queue_alloc(12);
-
-    printf("%d\n", *(int*)queue->value);
-    
-    // enqueue(queue, 10);
-    // enqueue(queue, 20);
-    // enqueue(queue, 50);
-    // printList(queue->front);
-    // dequeue(queue);
-    // printList(queue->front);
-
-    // void *item = (void*)&queue->front->data;
-    // ///
-
-    // // queue_test.c
-    // Task *task = (Task*)item;
-    // printf("%d\n", task->value);  // 10 is outputted
-
-    // // free(task);  
-    // // free(queue->front);
-    // free_list(queue->front);
-    // free(queue);
-    //
-}
-
-
 int main()
 {
-    // Queue *queue = queue_alloc(12);
+    Queue *queue = queue_alloc(12);
 
-    // int a = 10;
-    // int b = 20;
+    int a = 10;
+    int b = 20;
+    int c = 60;
 
 
     // dequeue(queue);
-    // enqueue(queue, (void*)&a);
-    // enqueue(queue, (void*)&b);
-    // enqueue(queue, (void*)&a);
+    enqueue(queue, (void*)&a);
+    enqueue(queue, (void*)&b);
+    enqueue(queue, (void*)&c);
     // printf("Queue before dequeue\n");
-    // printList(queue->front);
-    // dequeue(queue);
-    // printf("Queue after dequeue\n");
-    // printList(queue->front);
+    printList(queue->front);
+
+    dequeue(queue);
+    printf("Queue after dequeue\n");
+    printList(queue->front);
+    dequeue(queue);
+    printf("Queue after dequeue\n");
+    printList(queue->front);
 
     // free(queue->value);
     // free_list(queue);
-    puts("hello");
-    for (int i = 0; i < 10000000000; i++);
-    puts("done");
 
     return EXIT_SUCCESS;
 }

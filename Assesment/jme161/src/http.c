@@ -13,12 +13,13 @@
 #define HANDLE_ERROR(msg) \
         do { puts("Error: "msg); exit(EXIT_FAILURE); } while(0)
 
+// #define HEADER(header, PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n User-Agent: getter\r\n\r\n", PAGE, HOST);
 #define HEADER(header, PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", PAGE, HOST);
 
-#define RANGE_LIMIT 500
-#define EMPTY_HEADER_SIZE 31
-#define BUF_SIZE 1024
 
+#define BYTE_LIMIT 500
+#define EMPTY_HEADER_SIZE 52
+#define BUF_SIZE 1024
 
 
 /**
@@ -80,26 +81,32 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     struct addrinfo *addr = NULL;
 
     // Dynamically allocating memory space 
-    char *usrPort = (char*)malloc(sizeof(char) * RANGE_LIMIT);
+    char *usrPort = (char*)malloc(sizeof(char) * BYTE_LIMIT);
     char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE));
     buffer->length = 0;
+    // char buf[10];
 
-    // Format the port to a string   
+    // Format and check conditions
     sprintf(usrPort, "%d", port);
-    if ((port < 0 ) || (port > RANGE_LIMIT)) HANDLE_ERROR("port");
+    if ((port < 0 ) || (port > BYTE_LIMIT)) HANDLE_ERROR("Port");
+    // int a = (int)strtod(buf, &range);
+    // printf("%d\n", a);
+    // if (((int)range < 0 ) || ((int)range > BYTE_LIMIT)) HANDLE_ERROR("Range Limit");
+    
+
     
     // Create a socket and get the hosts info
     int sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
-    if (sockfd == EOF) HANDLE_ERROR("socket");
+    if (sockfd == -1) HANDLE_ERROR("Socket");
     addrInfo.ai_family = AF_INET;
     addrInfo.ai_socktype = SOCK_STREAM;
     getaddrinfo(host, usrPort, &addrInfo, &addr);
 
     // Connect to the host;
     int rc = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
-    if (rc == EOF) HANDLE_ERROR("connect");
+    if (rc == -1) HANDLE_ERROR("Connect");
 
     // Formatting the header
     HEADER(header, page, host);
@@ -141,7 +148,8 @@ char* http_get_content(Buffer *response) {
  * @param range - The desired byte range of data to retrieve from the page
  * @return Buffer pointer holding raw string data or NULL on failure
  */
-Buffer *http_url(const char *url, const char *range) {
+Buffer *http_url(const char *url, const char *range)
+{
     char host[BUF_SIZE];
     strncpy(host, url, BUF_SIZE);
 
@@ -164,13 +172,17 @@ Buffer *http_url(const char *url, const char *range) {
 /**
  * Makes a HEAD request to a given URL and gets the content length
  * Then determines max_chunk_size and number of split downloads needed
- * @param url   The URL of the resource to download
+ * @param url       The URL of the resource to download
  * @param threads   The number of threads to be used for the download
- * @return int  The number of downloads needed satisfying max_chunk_size
- *              to download the resource
+ * @return int      The number of downloads needed satisfying max_chunk_size
+ *                  to download the resource
  */
-int get_num_tasks(char *url, int threads) {
-   assert(0 && "not implemented yet!");
+int get_num_tasks(char *url, int threads) 
+{
+    Buffer *buffer = http_url(url, (char*)BUF_SIZE);
+    max_chunk_size = buffer->length;
+
+    return max_chunk_size / threads;
 }
 
 

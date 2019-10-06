@@ -14,3 +14,7 @@
 
 # Part 2:
 ./queue_test
+
+
+# Part 3:
+./downloader small.txt 12 download

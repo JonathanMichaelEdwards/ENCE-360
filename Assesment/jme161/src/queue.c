@@ -30,7 +30,7 @@ typedef struct QueueStruct {
 
     void *value;
     int size;
-
+    int capcity;
     struct QueueStruct *next;
 } Queue;
 
@@ -42,9 +42,9 @@ typedef struct QueueStruct {
  */
 Queue *queue_alloc(int size) 
 {
-    Queue *queue = (Queue*)malloc(sizeof(Queue));
+    Queue *queue = (Queue*)malloc(sizeof(Queue) * size);
     queue->next = NULL;
-    queue->value = NULL;
+    queue->capcity = size;
     queue->size = 0;
 
     pthread_mutex_init(&queue->lockHead, NULL);
@@ -56,16 +56,6 @@ Queue *queue_alloc(int size)
     return queue;
 }
 
-
-void free_list(Queue *list) 
-{
-    for (Queue *l = list; l != NULL;) {
-        Queue *next = l->next;
-        free(l);
-
-        l = next;
-    }
-}
 
 
 /**
@@ -83,41 +73,6 @@ void queue_free(Queue *queue)
 }
 
 
-
-
-//
-// Print all the values in a linked list structure
-//
-void print_list(Queue *list) {
-    for (Queue*l = list; l != NULL; l = l->next) {
-        printf("%d", *(int*)l->value);
-
-        if (l->next) {
-            printf(", ");
-        }
-    }
-
-    printf("\n");
-}
-
-
-//
-// Append a value to the front of a linked list
-// the returned list now looks like:  head->rest of list 
-//
-Queue *append(void *x, Queue *head) 
-{
-    Queue *queue_ = head;
-    
-    queue_->next = head;
-    queue_->value = x;
-    queue_->size++;
-
-    return queue_;
-}
-
-
-
 /**
  * Place an item into the concurrent queue.
  * If no space available then queue will block
@@ -129,20 +84,20 @@ Queue *append(void *x, Queue *head)
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
-// int arr[20];
-
 void queue_put(Queue *queue, void *item) 
 {   
     sem_wait(&queue->write);
     pthread_mutex_lock(&queue->lockTail);
-    
-    // queue->next = NULL;
-    // queue->value = item;
-    // queue->size++;
-    queue = append(item, queue);
 
-    pthread_mutex_unlock(&queue->lockTail);
-    sem_post(&queue->read);
+    // Block the queue if it is full
+    if (queue->size < queue->capcity) {
+        queue->next = NULL;
+        queue->value = item;
+        queue->size++;
+
+        pthread_mutex_unlock(&queue->lockTail);
+        sem_post(&queue->read);
+    }
 }
 
 
@@ -157,21 +112,21 @@ void queue_put(Queue *queue, void *item)
  * @return item - item retrieved from queue. void* type since it can be 
  *                arbitrary 
  */
-// make && ./queue_test
 void *queue_get(Queue *queue) 
 {
     void *item = NULL;
 
     sem_wait(&queue->read);
-    pthread_mutex_lock(&queue->lockTail);
+    pthread_mutex_lock(&queue->lockHead);
 
-    if (queue->size > 0) {
+    // Block the queue if it is empty
+    if (queue != NULL) {
         item = queue->value;
-    }
-    // queue->size--;
+        queue->size--;
 
-    pthread_mutex_unlock(&queue->lockTail);
-    sem_post(&queue->write);
+        pthread_mutex_unlock(&queue->lockHead);
+        sem_post(&queue->write);
+    } 
 
     return item;
 }
