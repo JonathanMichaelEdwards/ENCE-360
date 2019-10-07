@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <time.h>
 
+
+
 //Allocate a zero vector of length n
 double *alloc_vec(int n) {
     double *res = (double*)malloc(sizeof(double) * n);
