@@ -114,6 +114,11 @@ void queue_put(Queue *queue, void *item)
 {   
     // Manager *manage = (Manager*)malloc(sizeof(Manager));
 
+    if (queue->size == 10) {
+        sem_destroy(&read);
+        sem_destroy(&write);
+    }
+
     // sem_wait(&queue->stop2);
     sem_wait(&write);
     // pthread_mutex_lock(&lock);
@@ -130,18 +135,17 @@ void queue_put(Queue *queue, void *item)
     queue_->next = NULL;
     
     if (queue->rear == NULL) {
-        // puts("yes");
         queue->front = queue->rear = queue_;
     } else {
-        // queue->value = item;
+        queue->value = item;
         queue->rear->next = queue_;
         queue->rear = queue_;
     }
 
     // queue->value = item;
     // queue->size++;
-
     queue->size++;
+
     // printf("send ");
     if (item != NULL) 
         printf("sent: %d\n", *(int*)item);
@@ -180,8 +184,7 @@ void *queue_get(Queue *queue)
 
 
     // Goes over one to many hence program blocks.
-    if (0 < queue->size) { // && queue->size < queue->capacity) {  //&& queue->front->next != NULL
-        item = queue->front->value;
+    if (0 < queue->size) {
         if (queue->front->next != NULL) {
             item = queue->front->value;
             if (queue->front->value != NULL) printf("got: %d\n", *(int*)queue->front->value); 
@@ -189,10 +192,10 @@ void *queue_get(Queue *queue)
             queue = queue->next;
         }
     }
+    
 
     // sem_destroy(&write);
     // sem_destroy(&read);
-    // exit(EXIT_SUCCESS);
 
     // pthread_mutex_unlock(&lock2);
     pthread_mutex_unlock(&lock);
