@@ -25,7 +25,6 @@
 
 typedef struct QueueStruct {
     void *value;
-    int size;
     int capacity;
 
     struct QueueStruct *head;
@@ -39,6 +38,8 @@ typedef struct {
 
     sem_t read;
     sem_t write;
+
+    int size;
 } Manager;
 Manager manage;
 
@@ -51,11 +52,9 @@ Manager manage;
 Queue *queue_alloc(int size) 
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
-    queue->next = NULL;
-    queue->head = NULL; //(Queue*)malloc(sizeof(Queue));;
-    queue->tail = NULL;
+    queue->next = queue->head = queue->tail = NULL;
     queue->capacity = size;
-    queue->size = 0;
+    manage.size = 0;
 
     pthread_mutex_init(&manage.lock, NULL);
 
@@ -65,6 +64,17 @@ Queue *queue_alloc(int size)
     return queue;
 }
 
+
+void printList(Queue *list)
+{
+    printf("Queue = [");
+    while (list != NULL) {
+        printf("%d", *(int*)list->value);
+        if(list->next != NULL) printf(", ");
+        list = list->next;
+    }
+    puts("]");
+}
 
 
 /**
@@ -93,21 +103,6 @@ void queue_free(Queue *queue)
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
-
-
-void printList(Queue *list)
-{
-    printf("Queue = [");
-    while (list != NULL) {
-        printf("%d", *(int*)list->value);
-        if(list->next != NULL) printf(", ");
-        list = list->next;
-    }
-    puts("]");
-}
-
-
-int size = 0;
 void queue_put(Queue *queue, void *item) 
 {   
     sem_wait(&manage.write);
@@ -123,13 +118,12 @@ void queue_put(Queue *queue, void *item)
     } else {
         queue->tail->next = queue_;
         queue->tail = queue_;
-        if (size == 0) {
+        if (manage.size == 0) {
             queue->head = queue_;
         }
     }
-    size++;
-    // if (item != NULL) { printf("+ "); printList(queue->head); };
-    
+    manage.size++;
+    if (item != NULL) { printf("+ "); printList(queue->head); };
 
     pthread_mutex_unlock(&manage.lock);
     sem_post(&manage.read);
@@ -158,9 +152,9 @@ void *queue_get(Queue *queue)
         item = queue->head->value;
         queue->head = queue->head->next;
         queue = queue->next;
-        size--;
+        manage.size--;
     } 
-    // if (item != NULL) { printf("- "); printList(queue); };
+    if (item != NULL) { printf("- "); printList(queue); };
     
     pthread_mutex_unlock(&manage.lock);
     sem_post(&manage.write);

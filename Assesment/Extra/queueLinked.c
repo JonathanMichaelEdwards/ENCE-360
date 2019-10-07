@@ -10,33 +10,14 @@
 
 
 typedef struct queue {
-    // sem_t read;
-    // sem_t write;
-
-    pthread_mutex_t lockTail;
-    pthread_mutex_t lockHead;
 
     void *value;
-    int size;
     struct queue *next;
     struct queue *head;
     struct queue *tail;
 } Queue;
 
 
-// typedef struct queueStore {
-//     // pthread_mutex_t lockTail;
-//     // pthread_mutex_t lockHead;
-
-//     struct queueStore *head;
-//     struct queueStore *tail;
-//     Queue *queueInfo;
-// } QueueStore;
-
-
-pthread_mutex_t lock;
-sem_t read;
-sem_t write;
 
 Queue *queue_alloc(int size) 
 {
@@ -47,82 +28,9 @@ Queue *queue_alloc(int size)
     queue->head = NULL;
     queue->tail = NULL;
     queue->value = malloc(sizeof(void));
-    queue->size = 0;
-
-    pthread_mutex_init(&queue->lockHead, NULL);
-    pthread_mutex_init(&queue->lockTail, NULL);
-    pthread_mutex_init(&lock, NULL);
-
-    sem_init(&read, 0, 0);
-    sem_init(&write, 0, 1); 
 
 
     return queue;
-}
-
-
-int size1 = 0;
-void enqueue(Queue *queue, void *value)
-{
-    // sem_wait(&queue->write);
-    // pthread_mutex_lock(&queue->lockHead);  
-
-
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
-
-    queue_->value = value;
-    queue_->next = NULL;
-
-    if (queue->tail == NULL) {
-        queue->head = queue->tail = queue_;
-    } else {
-        queue->tail->next = queue_;
-        queue->tail = queue_;
-        if (size1 == 0) {
-            queue->head->value = value;
-        }
-    }
-    
-    // if (queue->head->next != NULL) 
-    size1++;
-
-    printf("Queuing: %d\n", *(int*)queue_->value);
-
-
-    // pthread_mutex_unlock(&queue->lockTail);
-    // sem_post(&queue->read);
-}
-
-
-void dequeue(Queue *queue)
-{
-    //Queue *queue_ = queue->head;
-    // sem_wait(&queue->read);
-    pthread_mutex_lock(&lock);
-    
-    // while (queue->head->next != NULL) {
-    // if (queue->size > 0) {
-    //     // if (item != NULL) 
-    //     // if (queue->head != NULL) {
-
-    //     printf("dequeue: %d\n", *(int*)queue->head->value);
-    //     queue->head = queue->head->next;
-    //     queue = queue->next;
-    //     // }
-    // }
-    // if (queue != NULL) {
-    if (queue->head != NULL) {
-        if (queue->head->value != NULL) printf("got: %d\n", *(int*)queue->head->value); 
-        queue->head = queue->head->next;
-        queue = queue->next;
-
-        size1--;
-    }
-    // }
-        // break;
-    // }
-    pthread_mutex_unlock(&lock);
-    // sem_post(&queue->write);
 }
 
 
@@ -161,7 +69,6 @@ void free_list(Queue *list) {
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
-
 int size = 0;
 void queue_put(Queue *queue, void *item) 
 {   
