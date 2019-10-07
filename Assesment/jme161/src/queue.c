@@ -130,12 +130,12 @@ void queue_put(Queue *queue, void *item)
     queue_->next = NULL;
     
     if (queue->rear == NULL) {
+        // puts("yes");
         queue->front = queue->rear = queue_;
     } else {
         // queue->value = item;
         queue->rear->next = queue_;
         queue->rear = queue_;
-        // queue->value = item;
     }
 
     // queue->value = item;
@@ -178,12 +178,13 @@ void *queue_get(Queue *queue)
     // Block the queue if it is empty
     void *item = malloc(sizeof(void));
 
+
+    // Goes over one to many hence program blocks.
     if (0 < queue->size) { // && queue->size < queue->capacity) {  //&& queue->front->next != NULL
-        // item = queue->value;
-        // item = queue->front->value;
+        item = queue->front->value;
         if (queue->front->next != NULL) {
             item = queue->front->value;
-            if (item != NULL) printf("got: %d\n", *(int*)item);
+            if (queue->front->value != NULL) printf("got: %d\n", *(int*)queue->front->value); 
             queue->front = queue->front->next;
             queue = queue->next;
         }
@@ -192,9 +193,10 @@ void *queue_get(Queue *queue)
     // sem_destroy(&write);
     // sem_destroy(&read);
     // exit(EXIT_SUCCESS);
-    // sem_post(&queue->stop2);
+
     // pthread_mutex_unlock(&lock2);
     pthread_mutex_unlock(&lock);
+    // sem_post(&queue->stop2);
     sem_post(&write);
 
 

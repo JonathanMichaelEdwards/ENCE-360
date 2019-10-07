@@ -75,6 +75,7 @@ void enqueue(Queue *queue, void *value)
     } else {
         queue->tail->next = queue_;
         queue->tail = queue_;
+        queue->value = value;
     }
     queue->size++;
 
@@ -94,6 +95,8 @@ void dequeue(Queue *queue)
     
     // while (queue->head->next != NULL) {
     if (queue->size > 0) {
+        // if (item != NULL) 
+        printf("here %d %d\n", *(int*)queue->value, *(int*)queue->head->value); 
         // if (queue->head != NULL) {
 
         printf("dequeue: %d\n", *(int*)queue->head->value);
@@ -137,20 +140,27 @@ int main()
 
     int a = 10;
     int b = 20;
-    int c = 60;
+    int c = 30;
+    int d = 60;
 
 
     // dequeue(queue);
     enqueue(queue, (void*)&a);
     enqueue(queue, (void*)&b);
     enqueue(queue, (void*)&c);
+    enqueue(queue, (void*)&d);
+    enqueue(queue, (void*)&a);
+    enqueue(queue, (void*)&b);
     // printf("Queue before dequeue\n");
     printList(queue->head);
 
     dequeue(queue);
+    printList(queue->head);
+
     dequeue(queue);
     // printf("Queue after dequeue\n");
     printList(queue->head);
+    dequeue(queue);
     // dequeue(queue);
     // printf("Queue after dequeue\n");
     // printList(queue->head);
