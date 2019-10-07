@@ -5,7 +5,7 @@
 
 #include "queue.h"
 
-#define NUM_THREADS 2//16
+#define NUM_THREADS 16
 #define N 10//1000000
 
 

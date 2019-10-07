@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include <pthread.h>
 
 #define TRUE 1
@@ -9,6 +10,9 @@
 
 
 typedef struct queue {
+    sem_t read;
+    sem_t write;
+
     pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
 
@@ -30,6 +34,7 @@ typedef struct queue {
 // } QueueStore;
 
 
+pthread_mutex_t lock;
 
 Queue *queue_alloc(int size) 
 {
@@ -44,6 +49,10 @@ Queue *queue_alloc(int size)
 
     pthread_mutex_init(&queue->lockHead, NULL);
     pthread_mutex_init(&queue->lockTail, NULL);
+    pthread_mutex_init(&lock, NULL);
+
+    sem_init(&queue->read, 0, 0);
+    sem_init(&queue->write, 0, 1); 
 
 
     return queue;
@@ -52,9 +61,11 @@ Queue *queue_alloc(int size)
 
 void enqueue(Queue *queue, void *value)
 {
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
+    // sem_wait(&queue->write);
+    // pthread_mutex_lock(&queue->lockHead);  
 
-    pthread_mutex_lock(&queue->lockTail);
+
+    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
     queue_->value = value;
     queue_->next = NULL;
@@ -70,14 +81,16 @@ void enqueue(Queue *queue, void *value)
     printf("Queuing: %d\n", *(int*)queue_->value);
 
 
-    pthread_mutex_unlock(&queue->lockTail);
+    // pthread_mutex_unlock(&queue->lockTail);
+    // sem_post(&queue->read);
 }
 
 
 void dequeue(Queue *queue)
 {
     //Queue *queue_ = queue->head;
-    pthread_mutex_lock(&queue->lockHead);
+    // sem_wait(&queue->read);
+    pthread_mutex_lock(&lock);
     
     // while (queue->head->next != NULL) {
     if (queue->size > 0) {
@@ -90,7 +103,8 @@ void dequeue(Queue *queue)
     }
         // break;
     // }
-    pthread_mutex_unlock(&queue->lockHead);
+    pthread_mutex_unlock(&lock);
+    // sem_post(&queue->write);
 }
 
 

@@ -22,8 +22,10 @@
  * but it is hidden from the outside.
  */
 typedef struct QueueStruct {
-    sem_t read;
-    sem_t write;
+    // sem_t read;
+    // sem_t write;
+    sem_t stop1;
+    sem_t stop2;
 
     // pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
@@ -37,6 +39,17 @@ typedef struct QueueStruct {
 } Queue;
 
 
+// typedef struct {
+pthread_mutex_t lock;
+pthread_mutex_t lock2;
+
+sem_t read;
+sem_t write;
+
+//     // Queue *queue;
+// } Manager;
+
+
 /**
  * Allocate a concurrent queue of a specific size
  * @param size   - The size of memory to allocate to the queue
@@ -45,17 +58,26 @@ typedef struct QueueStruct {
 Queue *queue_alloc(int size) 
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
+    // Manager *manage = (Manager*)malloc(sizeof(Manager));
     queue->next = NULL;
-    queue->front = NULL;
+    queue->front = NULL; //(Queue*)malloc(sizeof(Queue));;
     queue->rear = NULL;
     queue->capacity = size;
     queue->size = 0;
 
-    pthread_mutex_init(&queue->lockHead, NULL);
+    
+
+    // pthread_mutex_init(&queue->lockHead, NULL);
+    pthread_mutex_init(&lock, NULL);
     // pthread_mutex_init(&queue->lockTail, NULL);
 
-    sem_init(&queue->read, 0, 0);
-    sem_init(&queue->write, 0, 1); 
+    sem_init(&read, 0, 0);
+    sem_init(&write, 0, 1); 
+    sem_init(&queue->stop1, 0, 0);
+    sem_init(&queue->stop2, 0, 1);
+
+    // sem_init(&queue->read, 0, 0);
+    // sem_init(&queue->write, 0, 1); 
 
     return queue;
 }
@@ -90,9 +112,14 @@ void queue_free(Queue *queue)
  */
 void queue_put(Queue *queue, void *item) 
 {   
-    // sem_wait(&queue->write);
+    // Manager *manage = (Manager*)malloc(sizeof(Manager));
 
-    pthread_mutex_lock(&queue->lockHead);   
+    // sem_wait(&queue->stop2);
+    sem_wait(&write);
+    // pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&lock2);
+
+    // pthread_mutex_lock(&queue->lockHead);   
     // pthread_mutex_lock(&queue->lockTail);
 
 
@@ -105,19 +132,26 @@ void queue_put(Queue *queue, void *item)
     if (queue->rear == NULL) {
         queue->front = queue->rear = queue_;
     } else {
+        // queue->value = item;
         queue->rear->next = queue_;
         queue->rear = queue_;
+        // queue->value = item;
     }
 
-    queue->size++;
-    printf("send ");
-    if (item != NULL) 
-        printf("%d\n", *(int*)item);
+    // queue->value = item;
+    // queue->size++;
 
+    queue->size++;
+    // printf("send ");
+    if (item != NULL) 
+        printf("sent: %d\n", *(int*)item);
 
     // pthread_mutex_unlock(&queue->lockTail);
-    pthread_mutex_unlock(&queue->lockHead);
-    // sem_post(&queue->read);
+    // pthread_mutex_unlock(&queue->lockHead);
+    pthread_mutex_unlock(&lock2);
+    // pthread_mutex_unlock(&lock);
+    sem_post(&read);
+    // sem_post(&queue->stop1);
 }
 
 
@@ -134,31 +168,35 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    // sem_wait(&queue->read);
+    sem_wait(&read);
+    // sem_wait(&queue->stop1);
+    pthread_mutex_lock(&lock);
+    // pthread_mutex_lock(&lock2);
     // // pthread_mutex_lock(&queue->lockTail);
-    pthread_mutex_lock(&queue->lockHead);
+    // pthread_mutex_lock(&queue->lockHead);
 
     // Block the queue if it is empty
     void *item = malloc(sizeof(void));
 
-    if (0 < queue->size && queue->size < queue->capacity) {  //&& queue->front->next != NULL
+    if (0 < queue->size) { // && queue->size < queue->capacity) {  //&& queue->front->next != NULL
         // item = queue->value;
-        // queue->front = queue->front->next;
-        // // if (queue->next != NULL) {
-        // queue = queue->next;
-        // }
-        puts("hi");
-        // if (item != NULL) 
-        //     printf("got: %d\n", *(int*)queue->value);
-    
+        // item = queue->front->value;
+        if (queue->front->next != NULL) {
+            item = queue->front->value;
+            if (item != NULL) printf("got: %d\n", *(int*)item);
+            queue->front = queue->front->next;
+            queue = queue->next;
+        }
     }
-    puts("bye"); 
 
-    
+    // sem_destroy(&write);
+    // sem_destroy(&read);
+    // exit(EXIT_SUCCESS);
+    // sem_post(&queue->stop2);
+    // pthread_mutex_unlock(&lock2);
+    pthread_mutex_unlock(&lock);
+    sem_post(&write);
 
-    pthread_mutex_unlock(&queue->lockHead);
-    // // pthread_mutex_unlock(&queue->lockTail);
-    // sem_post(&queue->write);
 
     return item;
 }
