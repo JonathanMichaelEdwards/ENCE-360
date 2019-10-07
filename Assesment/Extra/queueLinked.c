@@ -10,8 +10,8 @@
 
 
 typedef struct queue {
-    sem_t read;
-    sem_t write;
+    // sem_t read;
+    // sem_t write;
 
     pthread_mutex_t lockTail;
     pthread_mutex_t lockHead;
@@ -35,6 +35,8 @@ typedef struct queue {
 
 
 pthread_mutex_t lock;
+sem_t read;
+sem_t write;
 
 Queue *queue_alloc(int size) 
 {
@@ -51,8 +53,8 @@ Queue *queue_alloc(int size)
     pthread_mutex_init(&queue->lockTail, NULL);
     pthread_mutex_init(&lock, NULL);
 
-    sem_init(&queue->read, 0, 0);
-    sem_init(&queue->write, 0, 1); 
+    sem_init(&read, 0, 0);
+    sem_init(&write, 0, 1); 
 
 
     return queue;
@@ -126,12 +128,13 @@ void dequeue(Queue *queue)
 
 void printList(Queue *list)
 {
+    printf("Queue = [");
     while (list != NULL) {
         printf("%d", *(int*)list->value);
         if(list->next != NULL) printf(", ");
         list = list->next;
     }
-    puts("");
+    puts("]");
 }
 
 
@@ -144,9 +147,6 @@ void free_list(Queue *list) {
         l = next;
     }
 }
-
-
-
 
 
 
@@ -165,54 +165,23 @@ void free_list(Queue *list) {
 int size = 0;
 void queue_put(Queue *queue, void *item) 
 {   
-    // Manager *manage = (Manager*)malloc(sizeof(Manager));
-
-    // if (queue->size == 10) {
-    //     sem_destroy(&read);
-    //     sem_destroy(&write);
-    // }
-
-    // sem_wait(&queue->stop2);
-    // sem_wait(&write);
-    // pthread_mutex_lock(&lock);
-    // pthread_mutex_lock(&lock2);
-
-    // pthread_mutex_lock(&queue->lockHead);   
-    // pthread_mutex_lock(&queue->lockTail);
-
-
-    // Block the queue if it is full
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
     queue_->value = item;
     queue_->next = NULL;
     
-    // printf("size: %d\n", 
     if (queue->tail == NULL) {
         queue->head = queue->tail = queue_;
     } else {
         queue->tail->next = queue_;
         queue->tail = queue_;
         if (size == 0) {
-            queue->head->value = item;
+            queue->head = queue_;
         }
     }
-
-    // queue->value = item;
-    // queue->size++;
-    // if (queue->head->next != NULL) 
     size++;
 
-    // printf("send ");
-    if (item != NULL) 
-        printf("sent: %d\n", *(int*)item);
-
-    // pthread_mutex_unlock(&queue->lockTail);
-    // pthread_mutex_unlock(&queue->lockHead);
-    // pthread_mutex_unlock(&lock2);
-    // pthread_mutex_unlock(&lock);
-    // sem_post(&read);
-    // sem_post(&queue->stop1);
+    printf("(+) %d\n", *(int*)item);
 }
 
 
@@ -229,92 +198,58 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    // sem_wait(&read);
-    // // sem_wait(&queue->stop1);
-    // pthread_mutex_lock(&lock);
-    // pthread_mutex_lock(&lock2);
-    // // pthread_mutex_lock(&queue->lockTail);
-    // pthread_mutex_lock(&queue->lockHead);
-
-    // Block the queue if it is empty
     void *item = malloc(sizeof(void));
 
-
-    // Goes over one to many hence program blocks.
-
-    
     if (queue->head != NULL) {
         item = queue->head->value;
-        if (queue->head->value != NULL) printf("got: %d\n", *(int*)queue->head->value); 
         queue->head = queue->head->next;
         queue = queue->next;
-
         size--;
     } 
-    // if (queue->head != NULL) item = queue->head->value;
-    
 
-    // sem_destroy(&write);
-    // sem_destroy(&read);
-
-    // pthread_mutex_unlock(&lock2);
-    // pthread_mutex_unlock(&lock);
-    // // sem_post(&queue->stop2);
-    // sem_post(&write);
-
+    printf("(-) %d\n", *(int*)item);
 
     return item;
+}
+
+
+void test()
+{
+    Queue *queue = queue_alloc(12);
+
+    int a = 10;
+    int b = 20;
+    int c = 30;
+    int d = 60;
+
+    queue_get(queue);
+    printList(queue->head);
+    queue_get(queue);
+    printList(queue->head);
+
+    queue_put(queue, (void*)&a);
+    printList(queue->head);
+
+    queue_get(queue);
+    printList(queue->head);
+    
+    queue_put(queue, (void*)&b);
+    printList(queue->head);
+
+    queue_put(queue, (void*)&c);
+    printList(queue->head);
+
+    queue_get(queue);
+    printList(queue->head);
+
+    queue_put(queue, (void*)&d);
+    printList(queue->head);
 }
 
 // gcc -g -Wall -std=gnu99 queueLinked.c -o queueLinked && ./queueLinked
 int main()
 {
-    Queue *queue = queue_alloc(12);
-
-    int a = 10;
-    // int b = 20;
-    // int c = 30;
-    // int d = 60;
-
-
-    // dequeue(queue);
-    // dequeue(queue);
-    // dequeue(queue);
-    // dequeue(queue);
-    // dequeue(queue);
-    // dequeue(queue);
-
-    // enqueue(queue, (void*)&a);
-    // enqueue(queue, (void*)&b);
-    // enqueue(queue, (void*)&c);
-    // enqueue(queue, (void*)&d);
-    // enqueue(queue, (void*)&a);
-    // enqueue(queue, (void*)&b);
-
-    queue_put(queue, (void*)&a);
-    // queue_put(queue, (void*)&b);
-    // queue_put(queue, (void*)&c);
-    // queue_put(queue, (void*)&d);
-    // queue_put(queue, (void*)&a);
-    // queue_put(queue, (void*)&b);
-
-    void *item = queue_get(queue);
-    printf("item: %d\n", *(int*)item);
-
-    
-    printList(queue->head);
-    // dequeue(queue);
-    // printList(queue->head);
-    // dequeue(queue);
-    // printList(queue->head);
-    // dequeue(queue);
-    // printList(queue->head);
-    // dequeue(queue);
-    // printf("Queue after dequeue\n");
-    // printList(queue->head);
-
-    // free(queue->value);
-    // free_list(queue);
+    test();
 
     return EXIT_SUCCESS;
 }

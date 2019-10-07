@@ -21,6 +21,7 @@
         "utility": "c",
         "config": "c",
         "vector": "c",
-        "mixinvector": "c"
+        "mixinvector": "c",
+        "pthread.h": "c"
     }
 }
