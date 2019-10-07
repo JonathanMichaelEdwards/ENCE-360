@@ -110,19 +110,21 @@ void queue_free(Queue *queue)
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
+
+int size = 0;
 void queue_put(Queue *queue, void *item) 
 {   
     // Manager *manage = (Manager*)malloc(sizeof(Manager));
 
-    if (queue->size == 10) {
-        sem_destroy(&read);
-        sem_destroy(&write);
-    }
+    // if (queue->size == 10) {
+    //     sem_destroy(&read);
+    //     sem_destroy(&write);
+    // }
 
     // sem_wait(&queue->stop2);
     sem_wait(&write);
-    // pthread_mutex_lock(&lock);
-    pthread_mutex_lock(&lock2);
+    pthread_mutex_lock(&lock);
+    // pthread_mutex_lock(&lock2);
 
     // pthread_mutex_lock(&queue->lockHead);   
     // pthread_mutex_lock(&queue->lockTail);
@@ -134,26 +136,30 @@ void queue_put(Queue *queue, void *item)
     queue_->value = item;
     queue_->next = NULL;
     
+    // printf("size: %d\n", 
     if (queue->rear == NULL) {
         queue->front = queue->rear = queue_;
     } else {
-        queue->value = item;
         queue->rear->next = queue_;
         queue->rear = queue_;
+        if (size == 0) {
+            queue->front->value = item;
+        }
     }
 
     // queue->value = item;
     // queue->size++;
-    queue->size++;
+    // if (queue->front->next != NULL) 
+    size++;
 
     // printf("send ");
-    if (item != NULL) 
-        printf("sent: %d\n", *(int*)item);
+    // if (item != NULL) 
+        // printf("sent: %d\n", *(int*)item);
 
     // pthread_mutex_unlock(&queue->lockTail);
     // pthread_mutex_unlock(&queue->lockHead);
-    pthread_mutex_unlock(&lock2);
-    // pthread_mutex_unlock(&lock);
+    // pthread_mutex_unlock(&lock2);
+    pthread_mutex_unlock(&lock);
     sem_post(&read);
     // sem_post(&queue->stop1);
 }
@@ -184,14 +190,14 @@ void *queue_get(Queue *queue)
 
 
     // Goes over one to many hence program blocks.
-    if (0 < queue->size) {
-        if (queue->front->next != NULL) {
-            item = queue->front->value;
-            if (queue->front->value != NULL) printf("got: %d\n", *(int*)queue->front->value); 
-            queue->front = queue->front->next;
-            queue = queue->next;
-        }
-    }
+    if (queue->front->next != NULL) {
+        item = queue->front->value;
+        // if (queue->front->value != NULL) printf("got: %d\n", *(int*)queue->front->value); 
+        queue->front = queue->front->next;
+        queue = queue->next;
+    } else if (queue->front != NULL) item = queue->value;
+
+    size--;
     
 
     // sem_destroy(&write);

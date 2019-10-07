@@ -6,7 +6,7 @@
 #include "queue.h"
 
 #define NUM_THREADS 16
-#define N 10//1000000
+#define N 1000000
 
 
 typedef struct {

@@ -1,1 +1,3 @@
-printf("Queuing: %d\n", *(int*)queue_->value);
+size == 0) {
+            queue->head->value = item;
+        }
