@@ -90,7 +90,7 @@ void queue_free(Queue *queue)
  */
 void queue_put(Queue *queue, void *item) 
 {   
-    sem_wait(&queue->write);
+    // sem_wait(&queue->write);
 
     pthread_mutex_lock(&queue->lockHead);   
     // pthread_mutex_lock(&queue->lockTail);
@@ -110,11 +110,14 @@ void queue_put(Queue *queue, void *item)
     }
 
     queue->size++;
+    printf("send ");
+    if (item != NULL) 
+        printf("%d\n", *(int*)item);
 
 
     // pthread_mutex_unlock(&queue->lockTail);
     pthread_mutex_unlock(&queue->lockHead);
-    sem_post(&queue->read);
+    // sem_post(&queue->read);
 }
 
 
@@ -131,21 +134,22 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    sem_wait(&queue->read);
-    // pthread_mutex_lock(&queue->lockTail);
+    // sem_wait(&queue->read);
+    // // pthread_mutex_lock(&queue->lockTail);
     pthread_mutex_lock(&queue->lockHead);
 
     // Block the queue if it is empty
     void *item = malloc(sizeof(void));
 
     if (0 < queue->size && queue->size < queue->capacity) {  //&& queue->front->next != NULL
-        item = queue->value;
-        queue->front = queue->front->next;
-        // if (queue->next != NULL) {
-        queue = queue->next;
+        // item = queue->value;
+        // queue->front = queue->front->next;
+        // // if (queue->next != NULL) {
+        // queue = queue->next;
         // }
         puts("hi");
-        if (item != NULL) printf("%d\n", *(int*)item);
+        // if (item != NULL) 
+        //     printf("got: %d\n", *(int*)queue->value);
     
     }
     puts("bye"); 
@@ -153,8 +157,8 @@ void *queue_get(Queue *queue)
     
 
     pthread_mutex_unlock(&queue->lockHead);
-    // pthread_mutex_unlock(&queue->lockTail);
-    sem_post(&queue->write);
+    // // pthread_mutex_unlock(&queue->lockTail);
+    // sem_post(&queue->write);
 
     return item;
 }
