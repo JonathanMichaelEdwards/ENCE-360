@@ -44,7 +44,7 @@ typedef struct QueueStruct {
  */
 Queue *queue_alloc(int size) 
 {
-    Queue *queue = (Queue*)malloc(sizeof(Queue) * size);
+    Queue *queue = (Queue*)malloc(sizeof(Queue));
     queue->next = NULL;
     queue->front = NULL;
     queue->rear = NULL;
