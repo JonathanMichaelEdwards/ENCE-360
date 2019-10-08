@@ -1,2 +1,1 @@
-(&head);
-	// printf("Poppe
+freeList

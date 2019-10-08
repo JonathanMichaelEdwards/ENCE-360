@@ -23,7 +23,6 @@
  */
 typedef struct QueueStruct {
     void *value;
-    int capacity;
 
     struct QueueStruct *head;
     struct QueueStruct *tail;
@@ -38,12 +37,12 @@ typedef struct QueueStruct {
  *   of the Queue.  
  */
 typedef struct {
-    pthread_mutex_t lock;
+    int size;
+    int capacity;
 
     sem_t read;
     sem_t write;
-
-    int size;
+    pthread_mutex_t lock;
 } Manager;
 Manager manager;
 
@@ -57,7 +56,7 @@ Queue *queue_alloc(int size)
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
     queue->next = queue->head = queue->tail = NULL;
-    queue->capacity = size;
+    manager.capacity = size;
     manager.size = 0;
 
     pthread_mutex_init(&manager.lock, NULL);
@@ -69,15 +68,15 @@ Queue *queue_alloc(int size)
 }
 
 
-void printList(Queue *list)
-{
-    printf("Queue = [");
-    while (list != NULL) {
-        printf("%d", *(int*)list->value);
-        if(list->next != NULL) printf(", ");
-        list = list->next;
+void freeList(Queue *list)
+ {
+
+    for (Queue *l = list; l != NULL;) {
+        Queue *next = l->next;
+        free(l);
+
+        l = next;
     }
-    puts("]");
 }
 
 
@@ -92,6 +91,7 @@ void printList(Queue *list)
  */
 void queue_free(Queue *queue) 
 {
+    freeList(queue->head);
     free(queue);
 }
 
@@ -127,7 +127,6 @@ void queue_put(Queue *queue, void *item)
         }
     }
     manager.size++;
-    if (item != NULL) { printf("+ "); printList(queue->head); };
 
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.read);
@@ -150,15 +149,20 @@ void *queue_get(Queue *queue)
     sem_wait(&manager.read);
     pthread_mutex_lock(&manager.lock);
 
-    void *item = malloc(sizeof(void));
+    void *item = NULL;
+    Queue *temp = NULL;
 
     if (queue->head != NULL) {
-        item = queue->head->value;
-        queue->head = queue->head->next;
-        queue = queue->next;
         manager.size--;
+        temp = queue->head;
+        queue->head = queue->head->next;
+
+        if (queue->head == NULL) { 
+            queue->tail = NULL;
+		} 
+        item = temp->value;
+        free(temp);
     } 
-    if (item != NULL) { printf("- "); printList(queue); };
     
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.write);

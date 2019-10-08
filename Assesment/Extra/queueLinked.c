@@ -10,7 +10,6 @@
 
 
 typedef struct queue {
-
     void *value;
     struct queue *next;
     struct queue *head;
@@ -27,8 +26,7 @@ Queue *queue_alloc(int size)
     queue->next = NULL;
     queue->head = NULL;
     queue->tail = NULL;
-    queue->value = malloc(sizeof(void));
-
+    queue->value = NULL;
 
     return queue;
 }
@@ -46,7 +44,8 @@ void printList(Queue *list)
 }
 
 
-void free_list(Queue *list) {
+void free_list(Queue *list)
+ {
 
     for (Queue *l = list; l != NULL;) {
         Queue *next = l->next;
@@ -88,7 +87,7 @@ void queue_put(Queue *queue, void *item)
     }
     size++;
 
-    printf("(+) %d\n", *(int*)item);
+    // printf("(+) %d\n", *(int*)item);
 }
 
 
@@ -105,19 +104,31 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    void *item = malloc(sizeof(void));
+    void *item = NULL;
+    Queue *temp = NULL;
 
     if (queue->head != NULL) {
-        item = queue->head->value;
+        temp = queue->head;
         queue->head = queue->head->next;
-        queue = queue->next;
+
+
+        if (queue->head == NULL) { 
+			queue->tail = NULL;
+		} 
+
+        item = temp->value;
+        free(temp);
+
         size--;
+        
     } 
 
-    printf("(-) %d\n", *(int*)item);
+    
+    // printf("(-) %d\n", *(int*)item);
 
     return item;
 }
+
 
 
 void test()
@@ -128,11 +139,6 @@ void test()
     int b = 20;
     int c = 30;
     int d = 60;
-
-    queue_get(queue);
-    printList(queue->head);
-    queue_get(queue);
-    printList(queue->head);
 
     queue_put(queue, (void*)&a);
     printList(queue->head);
@@ -151,7 +157,20 @@ void test()
 
     queue_put(queue, (void*)&d);
     printList(queue->head);
+
+    queue_put(queue, (void*)&d);
+    printList(queue->head);
+
+    queue_put(queue, (void*)&a);
+    printList(queue->head);
+
+    queue_put(queue, (void*)&a);
+    printList(queue->head);
+
+    free_list(queue->head);
+    free(queue);
 }
+
 
 // gcc -g -Wall -std=gnu99 queueLinked.c -o queueLinked && ./queueLinked
 int main()
