@@ -16,13 +16,11 @@
 
 
 
-/*
- * Queue - the abstract type of a concurrent queue.
+/* -------- Queue --------
+ * Is an abstract type of a concurrent queue.
  * You must provide an implementation of this type 
  * but it is hidden from the outside.
  */
-
-
 typedef struct QueueStruct {
     void *value;
     int capacity;
@@ -33,6 +31,12 @@ typedef struct QueueStruct {
 } Queue;
 
 
+/* -------- Manager -------- 
+ * - Stores the read and write 
+ *   semephores, the lock mutex
+ *   and keeps track of the size
+ *   of the Queue.  
+ */
 typedef struct {
     pthread_mutex_t lock;
 
@@ -41,7 +45,7 @@ typedef struct {
 
     int size;
 } Manager;
-Manager manage;
+Manager manager;
 
 
 /**
@@ -54,12 +58,12 @@ Queue *queue_alloc(int size)
     Queue *queue = (Queue*)malloc(sizeof(Queue));
     queue->next = queue->head = queue->tail = NULL;
     queue->capacity = size;
-    manage.size = 0;
+    manager.size = 0;
 
-    pthread_mutex_init(&manage.lock, NULL);
+    pthread_mutex_init(&manager.lock, NULL);
 
-    sem_init(&manage.read, 0, 0);
-    sem_init(&manage.write, 0, 1); 
+    sem_init(&manager.read, 0, 0);
+    sem_init(&manager.write, 0, 1); 
 
     return queue;
 }
@@ -100,13 +104,13 @@ void queue_free(Queue *queue)
  *  
  * @param queue - Pointer to the queue to add an item to
  * @param item  - An item to add to queue. Uses void* to hold an arbitrary
- *               type. User's responsibility to manage memory and ensure
+ *               type. User's responsibility to manager memory and ensure
  *               it is correctly typed.
  */
 void queue_put(Queue *queue, void *item) 
 {   
-    sem_wait(&manage.write);
-    pthread_mutex_lock(&manage.lock);
+    sem_wait(&manager.write);
+    pthread_mutex_lock(&manager.lock);
 
     Queue *queue_ = (Queue*)malloc(sizeof(Queue));
 
@@ -118,15 +122,15 @@ void queue_put(Queue *queue, void *item)
     } else {
         queue->tail->next = queue_;
         queue->tail = queue_;
-        if (manage.size == 0) {
+        if (manager.size == 0) {
             queue->head = queue_;
         }
     }
-    manage.size++;
+    manager.size++;
     if (item != NULL) { printf("+ "); printList(queue->head); };
 
-    pthread_mutex_unlock(&manage.lock);
-    sem_post(&manage.read);
+    pthread_mutex_unlock(&manager.lock);
+    sem_post(&manager.read);
 }
 
 
@@ -143,8 +147,8 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    sem_wait(&manage.read);
-    pthread_mutex_lock(&manage.lock);
+    sem_wait(&manager.read);
+    pthread_mutex_lock(&manager.lock);
 
     void *item = malloc(sizeof(void));
 
@@ -152,12 +156,12 @@ void *queue_get(Queue *queue)
         item = queue->head->value;
         queue->head = queue->head->next;
         queue = queue->next;
-        manage.size--;
+        manager.size--;
     } 
     if (item != NULL) { printf("- "); printList(queue); };
     
-    pthread_mutex_unlock(&manage.lock);
-    sem_post(&manage.write);
+    pthread_mutex_unlock(&manager.lock);
+    sem_post(&manager.write);
 
     return item;
 }
