@@ -56,6 +56,7 @@ Queue *queue_alloc(int size)
 {
     Queue *queue = (Queue*)malloc(sizeof(Queue));
     queue->next = queue->head = queue->tail = NULL;
+    queue->value = NULL;
     manager.capacity = size;
     manager.size = 0;
 
@@ -70,7 +71,6 @@ Queue *queue_alloc(int size)
 
 void freeList(Queue *list)
  {
-
     for (Queue *l = list; l != NULL;) {
         Queue *next = l->next;
         free(l);
