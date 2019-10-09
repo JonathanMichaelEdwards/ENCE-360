@@ -231,7 +231,6 @@ int main(int argc, char **argv) {
         if (line[len - 1] == '\n') {
             line[len - 1] = '\0';
         }
-
         num_tasks = get_num_tasks(line, num_workers);
         bytes = get_max_chunk_size();
         

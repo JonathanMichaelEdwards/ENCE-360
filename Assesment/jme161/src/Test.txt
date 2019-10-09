@@ -12,7 +12,7 @@ make && ./http_test www.cosc.canterbury.ac.nz research/reports/PhdTheses/2015/ph
 make && ./test_download.sh www.cosc.canterbury.ac.nz/research/reports/PhdTheses/2015/phd_1501.pdf
 
 
-# Part 2:
+# Part 2: 
 make && ./queue_test
 make && valgrind --leak-check=full --show-leak-kinds=all ./queue_test
 
