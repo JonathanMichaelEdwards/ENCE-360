@@ -14,6 +14,7 @@ make && ./test_download.sh www.cosc.canterbury.ac.nz/research/reports/PhdTheses/
 
 # Part 2:
 make && ./queue_test
+make && valgrind --leak-check=full --show-leak-kinds=all ./queue_test
 
 
 # Part 3:

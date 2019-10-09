@@ -97,6 +97,23 @@ void queue_free(Queue *queue)
 
 
 /**
+ * Creates a temporary Queue 
+ * 
+ * @param queue - A NULL queue that stores a tem queue.
+ * @param item  - An item to be added onto the queue.
+ */
+void tempQueue(Queue **queue_, void *item)
+{
+    Queue *queueTemp = (Queue*)malloc(sizeof(Queue));
+
+    queueTemp->value = item;
+    queueTemp->next = NULL;
+
+    *queue_ = queueTemp;
+}
+
+
+/**
  * Place an item into the concurrent queue.
  * If no space available then queue will block
  * until a space is available when it will
@@ -112,21 +129,21 @@ void queue_put(Queue *queue, void *item)
     sem_wait(&manager.write);
     pthread_mutex_lock(&manager.lock);
 
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
-
-    queue_->value = item;
-    queue_->next = NULL;
+    Queue *queue_ = NULL;
     
-    if (queue->tail == NULL) {
-        queue->head = queue->tail = queue_;
-    } else {
-        queue->tail->next = queue_;
-        queue->tail = queue_;
-        if (manager.size == 0) {
-            queue->head = queue_;
+    if (manager.size < manager.capacity) {
+        tempQueue(&queue_, item);
+        if (queue->tail == NULL) {
+            queue->head = queue->tail = queue_;
+        } else {
+            queue->tail->next = queue_;
+            queue->tail = queue_;
+            if (manager.size == 0) {
+                queue->head = queue_;
+            }
         }
+        manager.size++;
     }
-    manager.size++;
 
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.read);
@@ -156,7 +173,6 @@ void *queue_get(Queue *queue)
         manager.size--;
         temp = queue->head;
         queue->head = queue->head->next;
-
         if (queue->head == NULL) { 
             queue->tail = NULL;
 		} 

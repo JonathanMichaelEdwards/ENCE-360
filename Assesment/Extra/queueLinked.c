@@ -3,10 +3,10 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#define TRUE 1
-#define FALSE 0
-#define FULL 10
 
+
+int size = 0;
+int capacity = 0;
 
 
 typedef struct queue {
@@ -17,16 +17,15 @@ typedef struct queue {
 } Queue;
 
 
-
 Queue *queue_alloc(int size) 
 {
-    // QueueStore *queueStore = (QueueStore*)malloc(sizeof(QueueStore));
     Queue *queue = (Queue*)malloc(sizeof(Queue));
 
     queue->next = NULL;
     queue->head = NULL;
     queue->tail = NULL;
     queue->value = NULL;
+    capacity = size;
 
     return queue;
 }
@@ -56,6 +55,22 @@ void free_list(Queue *list)
 }
 
 
+/**
+ * Creates a temporary Queue 
+ * 
+ * @param queue - A NULL queue that stores a tem queue.
+ * @param item  - An item to be added onto the queue.
+ */
+void tempQueue(Queue **queue_, void *item)
+{
+    Queue *queueTemp = (Queue*)malloc(sizeof(Queue));
+
+    queueTemp->value = item;
+    queueTemp->next = NULL;
+
+    *queue_ = queueTemp;
+}
+
 
 /**
  * Place an item into the concurrent queue.
@@ -68,24 +83,23 @@ void free_list(Queue *list)
  *               type. User's responsibility to manage memory and ensure
  *               it is correctly typed.
  */
-int size = 0;
 void queue_put(Queue *queue, void *item) 
 {   
-    Queue *queue_ = (Queue*)malloc(sizeof(Queue));
-
-    queue_->value = item;
-    queue_->next = NULL;
+    Queue *queue_ = NULL;
     
-    if (queue->tail == NULL) {
-        queue->head = queue->tail = queue_;
-    } else {
-        queue->tail->next = queue_;
-        queue->tail = queue_;
-        if (size == 0) {
-            queue->head = queue_;
+    if (size < capacity) {
+        tempQueue(&queue_, item);
+        if (queue->tail == NULL) {
+            queue->head = queue->tail = queue_;
+        } else {
+            queue->tail->next = queue_;
+            queue->tail = queue_;
+            if (size == 0) {
+                queue->head = queue_;
+            }
         }
+        size++;
     }
-    size++;
 
     // printf("(+) %d\n", *(int*)item);
 }
@@ -111,7 +125,6 @@ void *queue_get(Queue *queue)
         temp = queue->head;
         queue->head = queue->head->next;
 
-
         if (queue->head == NULL) { 
 			queue->tail = NULL;
 		} 
@@ -133,7 +146,7 @@ void *queue_get(Queue *queue)
 
 void test()
 {
-    Queue *queue = queue_alloc(12);
+    Queue *queue = queue_alloc(2);
 
     int a = 10;
     int b = 20;
