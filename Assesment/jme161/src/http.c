@@ -179,12 +179,9 @@ Buffer *http_url(const char *url, const char *range)
 int get_num_tasks(char *url, int threads) 
 {
     Buffer *buffer = http_url(url, (char*)BUF_SIZE);
-    // max_chunk_size = buffer->length / threads;
+    max_chunk_size = buffer->length;
 
-    // // return max_chunk_size / threads;
-    printf("%s\n", buffer->data);
-    printf("%d\n", buffer->length);
-    puts("here");
+    return max_chunk_size / threads;
 }
 
 

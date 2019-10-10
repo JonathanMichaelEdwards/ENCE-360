@@ -227,13 +227,14 @@ int main(int argc, char **argv) {
 
     int work = 0, bytes = 0, num_tasks = 0;
     while ((len = getline(&line, &len, fp)) != -1) {
-
         if (line[len - 1] == '\n') {
             line[len - 1] = '\0';
         }
         num_tasks = get_num_tasks(line, num_workers);
         bytes = get_max_chunk_size();
         
+        // The queue is getting blocked when becomes full!!!
+        // *** have to fix the queue ***
         for (int i  = 0; i < num_tasks; i ++) {
             ++work;
             queue_put(context->todo, new_task(line, i * bytes, (i+1) * bytes));
@@ -244,7 +245,6 @@ int main(int argc, char **argv) {
             --work;
             wait_task(download_dir, context);
         }
-        
         /* Merge the files -- simple synchronous method
          * Then remove the chunked download files
          * Beware, this is not an efficient method

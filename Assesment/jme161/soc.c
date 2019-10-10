@@ -1,52 +1,67 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
-int main(void) 
+
+void error(const char *msg) 
 {
-    //Stream sockets and rcv()
+    perror(msg);
+    exit(0);
+}
 
-    struct addrinfo addrinfo;
-    struct addrinfo *addr = NULL;
-    int sockfd;
 
-    char buf[2056];
-    int byte_count;
+int main(int argc, char *argv[]) 
+{
+    int sockfd, portno, n;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
 
-    sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
+    char buffer[10005];
+    portno = 80;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        error("ERROR opening socket");
+    }
 
-    //get host info, make socket and connect it
-    memset(&addrinfo, 0, sizeof(addrinfo));
-    addrinfo.ai_family = AF_INET;
-    addrinfo.ai_socktype = SOCK_STREAM;
+    server = gethostbyname("www.google.com.au");
+    if (server == NULL) {
+        fprintf(stderr, "ERROR, no such host\n");
+        exit(0);
+    }
 
-    getaddrinfo("www.example.com", "80", &addrinfo, &addr);
-    
-    printf("Connecting...\n");
-    connect(sockfd,addr->ai_addr,addr->ai_addrlen);
-    printf("Connected!\n");
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
 
-    // char *header = "GET /postgrad/documents/cribphdmay.doc HTTP/1.0\r\n" \
-    //                "Host: www.canterbury.ac.nz\r\n";
+    bcopy((char *) server->h_addr, (char *) &serv_addr.sin_addr.s_addr, server->h_length);
+    serv_addr.sin_port = htons(portno);
 
-    char *header = "GET /sqlrest/CUSTOMER/3/ HTTP/1.0\r\nHost: www.thomas-bayer.com\r\n\r\n";
-    send(sockfd,header,strlen(header),0);
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+        error("ERROR connecting");
+    }
+    puts("Retreiving HTML Head");
 
-    // send(sockfd, header ,sizeof(header),0);
-    printf("GET Sent...\n");
+    ssize_t nByte = write(sockfd, "HEAD / HTTP/1.0\r\nHost: www.google.com.au\r\n\r\n", strlen("HEAD / HTTP/1.1\r\n\r\n"));
+    if (nByte <= 0) {
+        perror("send");
+        exit(EXIT_FAILURE);
+    }
 
-    //all right ! now that we're connected, we can receive some data!
-    byte_count = recv(sockfd, buf,sizeof(buf)-1, 0); // <-- -1 to leave room for a null terminator
-    buf[byte_count] = 0; // <-- add the null terminator
-    printf("recv()'d %d bytes of data in buf\n",byte_count);
-    printf("%s\n\n\n",buf);
-    // byte_count = recv(sockfd, buf, sizeof(buf),0);
-    // printf("recv()'d %d bytes of data in buf\n",byte_count);
-    // printf("%s",buf);
+    size_t recived_len = 0;
+    if ((recived_len = read(sockfd, buffer, 10000)) > 0) {
+        //bzero(buffer, 256);
+        printf("%s\n\n", buffer);
+        // printf("%ld\n\n", recived_len);
+    }
 
+    if (recived_len == -1) {
+        perror("read");
+    }
+
+    close(sockfd);
     return 0;
 }
