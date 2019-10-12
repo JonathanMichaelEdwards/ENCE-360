@@ -131,6 +131,7 @@ void queue_put(Queue *queue, void *item)
 
     Queue *queue_ = NULL;
     
+
     if (manager.size < manager.capacity) {
         tempQueue(&queue_, item);
         if (queue->tail == NULL) {
@@ -167,9 +168,12 @@ void *queue_get(Queue *queue)
     pthread_mutex_lock(&manager.lock);
 
     void *item = NULL;
+    // void *item = malloc(sizeof(void) * 6);
     Queue *temp = NULL;
 
     if (queue->head != NULL) {
+        item = malloc(sizeof(void) * 2);
+        
         manager.size--;
         temp = queue->head;
         queue->head = queue->head->next;
@@ -178,10 +182,17 @@ void *queue_get(Queue *queue)
 		} 
         item = temp->value;
         free(temp);
+
+        // pthread_mutex_unlock(&manager.lock);
+        // sem_post(&manager.write);
+
+        // return item;
     } 
     
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.write);
 
     return item;
+
+    // return item;
 }

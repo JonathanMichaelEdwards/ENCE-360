@@ -79,15 +79,15 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     struct addrinfo *addr = NULL;
 
     // Dynamically allocating memory space 
-    char *usrPort = (char*)malloc(sizeof(char));
-    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));
+    char *usrPort = (char*)malloc(sizeof(char) * 2 + 1);
+    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + 52));//EMPTY_HEADER_SIZE));
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE));
     buffer->length = 0;
 
     // Format and check conditions
-    sprintf(usrPort, "%d", port);
     if (port != 80) HANDLE_ERROR("Port");
+    sprintf(usrPort, "%d", port);
     
 
     
@@ -105,7 +105,7 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     // Formatting the header
     // if (!strcmp(range, "")) {
     // sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);  // part 1
-    sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);  // part 3
+    sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
     // } else {
     //     sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
     // }
@@ -178,10 +178,11 @@ Buffer *http_url(const char *url, const char *range)
  */
 int get_num_tasks(char *url, int threads) 
 {
-    Buffer *buffer = http_url(url, (char*)BUF_SIZE);
-    max_chunk_size = buffer->length;
+    Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
+    buffer = http_url(url, (char*)BUF_SIZE);
+    max_chunk_size = buffer->length / threads;
 
-    return max_chunk_size / threads;
+    return threads;
 }
 
 
