@@ -104,10 +104,10 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
 
     // Formatting the header
     // if (!strcmp(range, "")) {
-    // sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);  // part 1
-    sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
+    sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);  // part 1
+    // sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
     // } else {
-    //     sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
+        // sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
     // }
     
     // Write and read N bytes of header data to FD
@@ -180,7 +180,7 @@ int get_num_tasks(char *url, int threads)
 {
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer = http_url(url, (char*)BUF_SIZE);
-    max_chunk_size = buffer->length / threads;
+    max_chunk_size = buffer->length;
 
     return threads;
 }

@@ -113,6 +113,19 @@ void tempQueue(Queue **queue_, void *item)
 }
 
 
+void printList(Queue *list)
+{
+    printf("Queue = [");
+    while (list != NULL) {
+        printf("%d", *(int*)list->value);
+        if(list->next != NULL) printf(", ");
+        list = list->next;
+    }
+    puts("]");
+}
+
+
+
 /**
  * Place an item into the concurrent queue.
  * If no space available then queue will block
@@ -131,7 +144,6 @@ void queue_put(Queue *queue, void *item)
 
     Queue *queue_ = NULL;
     
-
     if (manager.size < manager.capacity) {
         tempQueue(&queue_, item);
         if (queue->tail == NULL) {
@@ -146,6 +158,10 @@ void queue_put(Queue *queue, void *item)
         manager.size++;
     }
 
+    printf("%d %d ", manager.size, manager.capacity);
+    if (item != NULL) printList(queue->head);
+    // if (item != NULL) printf("item = %c\n", *(char*)item);
+    
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.read);
 }
@@ -167,14 +183,14 @@ void *queue_get(Queue *queue)
     sem_wait(&manager.read);
     pthread_mutex_lock(&manager.lock);
 
-    void *item = NULL;
-    // void *item = malloc(sizeof(void) * 6);
+    // void *item = NULL;
+    void *item = malloc(sizeof(Queue));
     Queue *temp = NULL;
 
     if (queue->head != NULL) {
-        item = malloc(sizeof(void) * 2);
+        // item = malloc(sizeof(void) * 2);
         
-        manager.size--;
+        // manager.size--;
         temp = queue->head;
         queue->head = queue->head->next;
         if (queue->head == NULL) { 
@@ -182,17 +198,12 @@ void *queue_get(Queue *queue)
 		} 
         item = temp->value;
         free(temp);
-
-        // pthread_mutex_unlock(&manager.lock);
-        // sem_post(&manager.write);
-
-        // return item;
     } 
+    // printf("here %d ", manager.size);
+    // if (item != NULL) printList(queue->head);
     
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.write);
 
     return item;
-
-    // return item;
 }
