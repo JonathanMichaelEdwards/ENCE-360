@@ -7,6 +7,18 @@
 
 #include "queue.h"
 
+typedef struct {
+    char *data;
+    size_t length;
+
+} Buffer;
+typedef struct {
+    char *url;
+    int min_range;
+    int max_range;
+    Buffer *result;
+}  Task;
+
 
 #define handle_error_en(en, msg) \
         do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
@@ -156,10 +168,11 @@ void queue_put(Queue *queue, void *item)
             }
         }
         manager.size++;
+        // printf("task: %d\n", *(int*)item);
     }
 
-    printf("%d %d ", manager.size, manager.capacity);
-    if (item != NULL) printList(queue->head);
+    // printf("%d %d ", manager.size, manager.capacity);
+    // if (item != NULL) printList(queue->head);
     // if (item != NULL) printf("item = %c\n", *(char*)item);
     
     pthread_mutex_unlock(&manager.lock);
@@ -184,13 +197,12 @@ void *queue_get(Queue *queue)
     pthread_mutex_lock(&manager.lock);
 
     // void *item = NULL;
-    void *item = malloc(sizeof(Queue));
+    void *item;// = NULL;
     Queue *temp = NULL;
 
     if (queue->head != NULL) {
         // item = malloc(sizeof(void) * 2);
-        
-        // manager.size--;
+        manager.size--;
         temp = queue->head;
         queue->head = queue->head->next;
         if (queue->head == NULL) { 

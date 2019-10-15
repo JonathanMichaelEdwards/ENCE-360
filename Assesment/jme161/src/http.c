@@ -72,6 +72,8 @@ void readBytes(int sockfd, Buffer *buffer)
  * @return Buffer - Pointer to a buffer holding response data from query
  *                  NULL is returned on failure.
  */
+
+int t1 = 0;
 Buffer *http_query(char *host, char *page, const char *range, int port) 
 {
     // Initialize Connector's and Server's address info   
@@ -89,7 +91,6 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     if (port != 80) HANDLE_ERROR("Port");
     sprintf(usrPort, "%d", port);
     
-
     
     // Create a socket and get the hosts info
     int sockfd = socket(AF_INET, SOCK_STREAM, STDIN_FILENO);
@@ -104,8 +105,8 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
 
     // Formatting the header
     // if (!strcmp(range, "")) {
-    sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);  // part 1
-    // sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
+    if (!t1) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);  // part 1
+    else sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
     // } else {
         // sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
     // }
@@ -178,9 +179,31 @@ Buffer *http_url(const char *url, const char *range)
  */
 int get_num_tasks(char *url, int threads) 
 {
+    char *b = malloc(sizeof(char));
+    char *c = malloc(sizeof(char));
+    char *line = malloc(sizeof(char));
+    long ret;
+
+    t1 = 1;
+
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer = http_url(url, (char*)BUF_SIZE);
-    max_chunk_size = buffer->length;
+    // max_chunk_size = buffer->length;
+    printf("%s", buffer->data);
+    
+
+    b = strstr(buffer->data, "Content-Length: ");
+    c = strtok(b, " ");
+    c = strtok(NULL, "\n");
+
+    // ret = strtol(c, &ptr, 10);
+    ret = atoi(c);
+
+    printf("%ld\n", ret);
+
+    max_chunk_size = (ret / threads) + 0.5;
+
+    t1 = 0;
 
     return threads;
 }

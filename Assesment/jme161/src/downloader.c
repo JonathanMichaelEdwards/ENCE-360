@@ -133,12 +133,12 @@ void free_task(Task *task) {
 
 
 void wait_task(const char *download_dir, Context *context) {
+    
     char filename[FILE_SIZE], url_file[FILE_SIZE];
     Task *task = (Task*)queue_get(context->done);
-    puts("here");  // fails here!!! (figure out why)
-    // printf("len=%d\n", task->max_range);
+    puts("3");
     if (task->result) {
-
+        puts("4");
         snprintf(url_file, FILE_SIZE * sizeof(char), "%d", task->min_range);
         size_t len = strlen(url_file);
         for (int i = 0; i < len; ++i) {
@@ -231,10 +231,9 @@ int main(int argc, char **argv) {
         if (line[len - 1] == '\n') {
             line[len - 1] = '\0';
         }
-        // num_tasks = get_num_tasks(line, num_workers);
-        num_tasks = 12;
-        // bytes = get_max_chunk_size();
-        bytes = 30000;
+        num_tasks = get_num_tasks(line, num_workers);
+        bytes = get_max_chunk_size();
+        puts("here 1");
 
         // The queue is getting blocked when becomes full!!!
         // *** have to fix the queue ***
@@ -242,18 +241,19 @@ int main(int argc, char **argv) {
             ++work;
             queue_put(context->todo, new_task(line, i * bytes, (i+1) * bytes));
         }
-      
+        puts("1");
         // Get results back
         while (work > 0) {
             --work;
             wait_task(download_dir, context);
         }
+        puts("2");
         /* Merge the files -- simple synchronous method
          * Then remove the chunked download files
          * Beware, this is not an efficient method
          */
         merge_files(download_dir, line, bytes, num_tasks);
-        remove_chunk_files(download_dir, bytes, num_tasks);
+        // remove_chunk_files(download_dir, bytes, num_tasks);
     }
    
     //cleanup

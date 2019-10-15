@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <semaphore.h>
 #include <pthread.h>
 
@@ -188,7 +189,24 @@ void test()
 // gcc -g -Wall -std=gnu99 queueLinked.c -o queueLinked && ./queueLinked
 int main()
 {
-    test();
+    // test();
+
+    char line[200];
+    char *a = "hello: one, Content: 100\n hello";
+    char *b = NULL;
+    char *c = NULL;
+    char *ptr;
+    long ret;
+
+    b = strstr(a, "Content: ");
+    strcpy(line, b);
+    c = strtok(line, " ");
+    c = strtok(NULL, "\n");
+
+//    ret = strtol(c, &ptr, 10);
+    ret = atoi(c);
+
+   printf("%ld\n", ret);
 
     return EXIT_SUCCESS;
 }
