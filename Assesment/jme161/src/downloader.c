@@ -236,15 +236,17 @@ int main(int argc, char **argv) {
 
         // The queue is getting blocked when becomes full!!!
         // *** have to fix the queue ***
-        for (int i  = 0; i < num_tasks; i ++) {
+        for (int i  = 0; i < num_tasks; i++) {
             ++work;
             queue_put(context->todo, new_task(line, i * bytes, (i+1) * bytes));
         }
+        
         puts("1");
         // Get results back
         while (work > 0) {
+            printf("Work: %d\n", work);
             --work;
-             wait_task(download_dir, context);
+            wait_task(download_dir, context);
         }
         puts("2");
         /* Merge the files -- simple synchronous method

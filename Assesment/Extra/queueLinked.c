@@ -195,7 +195,7 @@ int main()
     char *a = "hello: one, Content: 100\n hello";
     char *b = NULL;
     char *c = NULL;
-    char *ptr;
+    // char *ptr;
     long ret;
 
     b = strstr(a, "Content: ");
@@ -207,6 +207,10 @@ int main()
     ret = atoi(c);
 
    printf("%ld\n", ret);
+
+   int len = 49449;
+
+   printf("%d\n", (int)((float)len / 12 + 0.5));
 
     return EXIT_SUCCESS;
 }
