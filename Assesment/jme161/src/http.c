@@ -188,18 +188,12 @@ int get_num_tasks(char *url, int threads)
 
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer = http_url(url, (char*)BUF_SIZE);
-    // max_chunk_size = buffer->length;
-    printf("%s", buffer->data);
-    
+
 
     b = strstr(buffer->data, "Content-Length: ");
     c = strtok(b, " ");
     c = strtok(NULL, "\n");
-
-    // ret = strtol(c, &ptr, 10);
     ret = atoi(c);
-
-    printf("%ld\n", ret);
 
     max_chunk_size = (ret / threads) + 0.5;
 

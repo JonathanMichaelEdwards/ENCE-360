@@ -135,10 +135,10 @@ void free_task(Task *task) {
 void wait_task(const char *download_dir, Context *context) {
     
     char filename[FILE_SIZE], url_file[FILE_SIZE];
-    Task *task = (Task*)queue_get(context->done);
     puts("3");
+    Task *task = (Task*)queue_get(context->done);
+    puts("4");
     if (task->result) {
-        puts("4");
         snprintf(url_file, FILE_SIZE * sizeof(char), "%d", task->min_range);
         size_t len = strlen(url_file);
         for (int i = 0; i < len; ++i) {
@@ -233,7 +233,6 @@ int main(int argc, char **argv) {
         }
         num_tasks = get_num_tasks(line, num_workers);
         bytes = get_max_chunk_size();
-        puts("here 1");
 
         // The queue is getting blocked when becomes full!!!
         // *** have to fix the queue ***
@@ -245,7 +244,7 @@ int main(int argc, char **argv) {
         // Get results back
         while (work > 0) {
             --work;
-            wait_task(download_dir, context);
+             wait_task(download_dir, context);
         }
         puts("2");
         /* Merge the files -- simple synchronous method

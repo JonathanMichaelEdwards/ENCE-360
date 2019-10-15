@@ -196,23 +196,29 @@ void *queue_get(Queue *queue)
     sem_wait(&manager.read);
     pthread_mutex_lock(&manager.lock);
 
-    // void *item = NULL;
-    void *item;// = NULL;
+    void *item = NULL;
     Queue *temp = NULL;
 
-    if (queue->head != NULL) {
-        // item = malloc(sizeof(void) * 2);
-        manager.size--;
-        temp = queue->head;
-        queue->head = queue->head->next;
-        if (queue->head == NULL) { 
-            queue->tail = NULL;
-		} 
-        item = temp->value;
-        free(temp);
-    } 
-    // printf("here %d ", manager.size);
-    // if (item != NULL) printList(queue->head);
+    puts("in");
+    while (1) {
+        if (queue->head != NULL) {
+            puts("b");
+            // if (queue->head != NULL) printList(queue->head);
+
+            manager.size--;
+            temp = queue->head;
+            queue->head = queue->head->next;
+            if (queue->head == NULL) { 
+                queue->tail = NULL;
+            } 
+
+            item = temp->value;
+            free(temp);
+            // if (item != NULL) printList(queue->head);
+            break;
+        } 
+    }
+    puts("out\n");
     
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.write);
