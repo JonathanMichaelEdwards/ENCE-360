@@ -115,19 +115,6 @@ void tempQueue(Queue **queue_, void *item)
 }
 
 
-void printList(Queue *list)
-{
-    printf("Queue = [");
-    while (list != NULL) {
-        printf("%d", *(int*)list->value);
-        if(list->next != NULL) printf(", ");
-        list = list->next;
-    }
-    puts("]");
-}
-
-
-
 /**
  * Place an item into the concurrent queue.
  * If no space available then queue will block
@@ -157,23 +144,13 @@ void queue_put(Queue *queue, void *item)
                 queue->head = queue_;
             }
         }
-<<<<<<< HEAD
-        manager.size++;
-
-        if (item != NULL) printList(queue->head);
-
-        // printf("task: %d\n", *(int*)queue->head->value);
-=======
         queue->manager.size++;
->>>>>>> 5415ca98b6919f90c6bc91368897e216ea6d6f3b
     }
 
-    
     pthread_mutex_unlock(&queue->manager.lock);
     sem_post(&queue->manager.read);
 }
-
-
+    
 /**
  * Get an item from the concurrent queue
  * 
@@ -200,19 +177,9 @@ void *queue_get(Queue *queue)
         if (queue->head == NULL) { 
             queue->tail = NULL;
         } 
-
-<<<<<<< HEAD
-            // break;
-        } 
-    // }
-    puts("out\n");
-=======
         item = temp->value;
         free(temp);
     }
-    // puts("get");
->>>>>>> 5415ca98b6919f90c6bc91368897e216ea6d6f3b
-    
     pthread_mutex_unlock(&queue->manager.lock);
     sem_post(&queue->manager.write);
 

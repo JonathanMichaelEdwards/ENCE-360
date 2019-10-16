@@ -201,49 +201,27 @@ size_t file_size(int fd)
  */
 void merge_files(char *src, char *dest, int bytes, int tasks) 
 {
-    printf("dir = %s\n", src);
-    printf("dir = %s\n", dest);
-    printf("byte = %d\n", bytes);
-    printf("task = %d\n\n", tasks);
-    
-    // char *a = malloc(sizeof(char));
+    char *srcFile = malloc(sizeof(char) * (strlen(src)) + 6);
 
-    // sprintf(a, "%d", 300);
-    // printf("%d\n", strlen(a));
-    //char *srcBuff = malloc(sizeof(char) * (strlen(src) + strlen(a)) + 6);
-    char *srcFile = malloc(sizeof(char) * 100);
-    char *destFile = malloc(sizeof(char) * 100);
-    char ch;
+    char *tempDest = malloc(sizeof(char) *  strlen(dest));
+    memcpy(tempDest, dest, strlen(dest));
+    create_directory(strtok(tempDest, "/"));
 
-    sprintf(destFile, "%s/%s", src, dest);
-    FILE *mergeFile = fopen("download/merge.jpeg", "w");
-    printf("%s\n", destFile);
-    
+    printf("%s\n", dest);
+    FILE *mergeFile = fopen(dest, "w");
+
     FILE *getFile;
     for (int count = 0; count < (bytes*tasks); count += bytes) {
         sprintf(srcFile, "%s/%d", src, count);
-        printf("%s\n", srcFile);
 
         getFile = fopen(srcFile, "r");
 
-        // while((ch = fgetc(getFile)) != EOF)
-        //     fputc(ch, mergeFile);
-
         size_t size = file_size(fileno(getFile));  // File -> fd
         char *buffer = malloc(size);
-        size_t fileread = fread(buffer, size, 1, getFile);
+        fread(buffer, size, 1, getFile);
         fwrite(buffer, size, 1, mergeFile);
     }
-    puts("");
 
-    // FILE *file = fopen("download/0", "r");
-    // FILE *merge = fopen("download/merge", "w");
-
-    // size_t size = file_size(fileno(file));  // File -> fd
-    // char *buffer = malloc(size);
-    // size_t fileread = fread(buffer, size, 1, file);
-    // fwrite(buffer, size, 1, merge);
-    // read(file, buf, 
     fclose(mergeFile);
     fclose(getFile);
 }
