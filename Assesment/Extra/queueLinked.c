@@ -147,7 +147,7 @@ void *queue_get(Queue *queue)
 
 void test()
 {
-    Queue *queue = queue_alloc(2);
+    Queue *queue = queue_alloc(12);
 
     int a = 10;
     int b = 20;
@@ -189,28 +189,28 @@ void test()
 // gcc -g -Wall -std=gnu99 queueLinked.c -o queueLinked && ./queueLinked
 int main()
 {
-    // test();
+    test();
 
-    char line[200];
-    char *a = "hello: one, Content: 100\n hello";
-    char *b = NULL;
-    char *c = NULL;
-    // char *ptr;
-    long ret;
+//     char line[200];
+//     char *a = "hello: one, Content: 100\n hello";
+//     char *b = NULL;
+//     char *c = NULL;
+//     // char *ptr;
+//     long ret;
 
-    b = strstr(a, "Content: ");
-    strcpy(line, b);
-    c = strtok(line, " ");
-    c = strtok(NULL, "\n");
+//     b = strstr(a, "Content: ");
+//     strcpy(line, b);
+//     c = strtok(line, " ");
+//     c = strtok(NULL, "\n");
 
-//    ret = strtol(c, &ptr, 10);
-    ret = atoi(c);
+// //    ret = strtol(c, &ptr, 10);
+//     ret = atoi(c);
 
-   printf("%ld\n", ret);
+//    printf("%ld\n", ret);
 
-   int len = 49449;
+//    int len = 49449;
 
-   printf("%d\n", (int)((float)len / 12 + 0.5));
+//    printf("%d\n", (int)((float)len / 12 + 0.5));
 
     return EXIT_SUCCESS;
 }

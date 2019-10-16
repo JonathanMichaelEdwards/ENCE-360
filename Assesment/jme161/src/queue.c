@@ -170,7 +170,7 @@ void queue_put(Queue *queue, void *item)
         }
         manager.size++;
 
-        // if (item != NULL) printList(queue->head);
+        if (item != NULL) printList(queue->head);
 
         // printf("task: %d\n", *(int*)queue->head->value);
     }
@@ -217,8 +217,8 @@ void *queue_get(Queue *queue)
             // if (item != NULL) printf("item=%d\n", *(int*)item);
 
             // break;
-        // } 
-    }
+        } 
+    // }
     puts("out\n");
     
     pthread_mutex_unlock(&manager.lock);

@@ -231,8 +231,11 @@ int main(int argc, char **argv) {
         if (line[len - 1] == '\n') {
             line[len - 1] = '\0';
         }
-        num_tasks = get_num_tasks(line, num_workers);
-        bytes = get_max_chunk_size();
+        // num_tasks = get_num_tasks(line, num_workers);
+        // bytes = get_max_chunk_size();
+
+        num_tasks = 12;
+        bytes = 49449;
 
         // The queue is getting blocked when becomes full!!!
         // *** have to fix the queue ***
@@ -253,7 +256,7 @@ int main(int argc, char **argv) {
          * Then remove the chunked download files
          * Beware, this is not an efficient method
          */
-        // merge_files(download_dir, line, bytes, num_tasks);
+        merge_files(download_dir, line, bytes, num_tasks);
         // remove_chunk_files(download_dir, bytes, num_tasks);
     }
    
