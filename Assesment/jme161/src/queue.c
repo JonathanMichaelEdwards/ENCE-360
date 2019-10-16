@@ -156,7 +156,7 @@ void queue_put(Queue *queue, void *item)
 
     Queue *queue_ = NULL;
     
-    // if (manager.size < manager.capacity) {
+    if (manager.size < manager.capacity) {
         tempQueue(&queue_, item);
         if (queue->tail == NULL) {
             queue->head = queue->tail = queue_;
@@ -166,14 +166,15 @@ void queue_put(Queue *queue, void *item)
             if (manager.size == 0) {
                 queue->head = queue_;
             }
+        //    printList(queue->head);
         }
         manager.size++;
-        // printf("task: %d\n", *(int*)queue->head->value);
-    // }
 
-    // printf("%d %d ", manager.size, manager.capacity);
-    if (item != NULL) printList(queue->head);
-    // if (item != NULL) printf("item = %c\n", *(char*)item);
+        // if (item != NULL) printList(queue->head);
+
+        // printf("task: %d\n", *(int*)queue->head->value);
+    }
+
     
     pthread_mutex_unlock(&manager.lock);
     sem_post(&manager.read);
@@ -199,8 +200,8 @@ void *queue_get(Queue *queue)
     void *item = NULL;
     Queue *temp = NULL;
 
-    puts("in 1");
-    while (1) {  // take while loop out is the other way
+    puts("in");
+    // while (1) {
         if (queue->head != NULL) {   
             puts("b");
             manager.size--;
@@ -213,8 +214,10 @@ void *queue_get(Queue *queue)
             item = temp->value;
             free(temp);
 
-            break;
-        } 
+            // if (item != NULL) printf("item=%d\n", *(int*)item);
+
+            // break;
+        // } 
     }
     puts("out\n");
     

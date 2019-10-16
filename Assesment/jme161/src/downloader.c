@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
          * Then remove the chunked download files
          * Beware, this is not an efficient method
          */
-        merge_files(download_dir, line, bytes, num_tasks);
+        // merge_files(download_dir, line, bytes, num_tasks);
         // remove_chunk_files(download_dir, bytes, num_tasks);
     }
    
