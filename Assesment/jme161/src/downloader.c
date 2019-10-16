@@ -213,7 +213,6 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
     //char *srcBuff = malloc(sizeof(char) * (strlen(src) + strlen(a)) + 6);
     char *srcFile = malloc(sizeof(char) * 100);
     char *destFile = malloc(sizeof(char) * 100);
-    char ch;
 
     sprintf(destFile, "%s/%s", src, dest);
     FILE *mergeFile = fopen("download/merge.jpeg", "w");
@@ -231,7 +230,7 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
 
         size_t size = file_size(fileno(getFile));  // File -> fd
         char *buffer = malloc(size);
-        size_t fileread = fread(buffer, size, 1, getFile);
+        fread(buffer, size, 1, getFile);
         fwrite(buffer, size, 1, mergeFile);
     }
     puts("");
