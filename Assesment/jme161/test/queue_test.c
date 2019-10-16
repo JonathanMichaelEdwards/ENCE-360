@@ -5,8 +5,13 @@
 
 #include "queue.h"
 
+<<<<<<< HEAD
 #define NUM_THREADS 1//16
 #define N 5//1000000
+=======
+#define NUM_THREADS 16
+#define N 1000000
+>>>>>>> 5415ca98b6919f90c6bc91368897e216ea6d6f3b
 
 
 typedef struct {

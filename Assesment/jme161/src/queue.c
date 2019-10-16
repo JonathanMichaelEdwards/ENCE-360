@@ -7,17 +7,6 @@
 
 #include "queue.h"
 
-typedef struct {
-    char *data;
-    size_t length;
-
-} Buffer;
-typedef struct {
-    char *url;
-    int min_range;
-    int max_range;
-    Buffer *result;
-}  Task;
 
 
 #define handle_error_en(en, msg) \
@@ -25,21 +14,6 @@ typedef struct {
 
 #define handle_error(msg) \
         do { perror(msg); exit(EXIT_FAILURE); } while (0)
-
-
-
-/* -------- Queue --------
- * Is an abstract type of a concurrent queue.
- * You must provide an implementation of this type 
- * but it is hidden from the outside.
- */
-typedef struct QueueStruct {
-    void *value;
-
-    struct QueueStruct *head;
-    struct QueueStruct *tail;
-    struct QueueStruct *next;
-} Queue;
 
 
 /* -------- Manager -------- 
@@ -56,7 +30,23 @@ typedef struct {
     sem_t write;
     pthread_mutex_t lock;
 } Manager;
-Manager manager;
+
+
+/* -------- Queue --------
+ * Is an abstract type of a concurrent queue.
+ * You must provide an implementation of this type 
+ * but it is hidden from the outside.
+ */
+typedef struct QueueStruct {
+    void *value;
+
+    struct QueueStruct *head;
+    struct QueueStruct *tail;
+    struct QueueStruct *next;
+
+    Manager manager;
+} Queue;
+
 
 
 /**
@@ -69,13 +59,13 @@ Queue *queue_alloc(int size)
     Queue *queue = (Queue*)malloc(sizeof(Queue));
     queue->next = queue->head = queue->tail = NULL;
     queue->value = NULL;
-    manager.capacity = size;
-    manager.size = 0;
+    queue->manager.capacity = size;
+    queue->manager.size = 0;
 
-    pthread_mutex_init(&manager.lock, NULL);
+    pthread_mutex_init(&queue->manager.lock, NULL);
 
-    sem_init(&manager.read, 0, 0);
-    sem_init(&manager.write, 0, 1); 
+    sem_init(&queue->manager.read, 0, 0);
+    sem_init(&queue->manager.write, 0, 1); 
 
     return queue;
 }
@@ -151,33 +141,36 @@ void printList(Queue *list)
  */
 void queue_put(Queue *queue, void *item) 
 {   
-    sem_wait(&manager.write);
-    pthread_mutex_lock(&manager.lock);
+    sem_wait(&queue->manager.write);
+    pthread_mutex_lock(&queue->manager.lock);
 
     Queue *queue_ = NULL;
     
-    if (manager.size < manager.capacity) {
+    if (queue->manager.size < queue->manager.capacity) {
         tempQueue(&queue_, item);
         if (queue->tail == NULL) {
             queue->head = queue->tail = queue_;
         } else {
             queue->tail->next = queue_;
             queue->tail = queue_;
-            if (manager.size == 0) {
+            if (queue->manager.size == 0) {
                 queue->head = queue_;
             }
-        //    printList(queue->head);
         }
+<<<<<<< HEAD
         manager.size++;
 
         if (item != NULL) printList(queue->head);
 
         // printf("task: %d\n", *(int*)queue->head->value);
+=======
+        queue->manager.size++;
+>>>>>>> 5415ca98b6919f90c6bc91368897e216ea6d6f3b
     }
 
     
-    pthread_mutex_unlock(&manager.lock);
-    sem_post(&manager.read);
+    pthread_mutex_unlock(&queue->manager.lock);
+    sem_post(&queue->manager.read);
 }
 
 
@@ -194,35 +187,34 @@ void queue_put(Queue *queue, void *item)
  */
 void *queue_get(Queue *queue) 
 {
-    sem_wait(&manager.read);
-    pthread_mutex_lock(&manager.lock);
+    sem_wait(&queue->manager.read);
+    pthread_mutex_lock(&queue->manager.lock);
 
     void *item = NULL;
     Queue *temp = NULL;
 
-    puts("in");
-    // while (1) {
-        if (queue->head != NULL) {   
-            puts("b");
-            manager.size--;
-            temp = queue->head;
-            queue->head = queue->head->next;
-            if (queue->head == NULL) { 
-                queue->tail = NULL;
-            } 
+    if (queue->head != NULL) {   
+        queue->manager.size--;
+        temp = queue->head;
+        queue->head = queue->head->next;
+        if (queue->head == NULL) { 
+            queue->tail = NULL;
+        } 
 
-            item = temp->value;
-            free(temp);
-
-            // if (item != NULL) printf("item=%d\n", *(int*)item);
-
+<<<<<<< HEAD
             // break;
         } 
     // }
     puts("out\n");
+=======
+        item = temp->value;
+        free(temp);
+    }
+    // puts("get");
+>>>>>>> 5415ca98b6919f90c6bc91368897e216ea6d6f3b
     
-    pthread_mutex_unlock(&manager.lock);
-    sem_post(&manager.write);
+    pthread_mutex_unlock(&queue->manager.lock);
+    sem_post(&queue->manager.write);
 
     return item;
 }
