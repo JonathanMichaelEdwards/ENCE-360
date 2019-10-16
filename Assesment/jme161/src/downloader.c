@@ -13,6 +13,10 @@
 
 #define FILE_SIZE 256
 
+#define handle_error(msg) \
+        do { perror(msg); exit(EXIT_FAILURE); } while (0)
+
+
 typedef struct {
     char *url;
     int min_range;
@@ -178,6 +182,15 @@ void wait_task(const char *download_dir, Context *context) {
 }
 
 
+size_t file_size(int fd) 
+{
+  struct stat sb;  
+  if (fstat(fd, &sb) == -1) handle_error("fstat");
+  
+  return  sb.st_size;
+}
+
+
 /**
  * Merge all files in from src to file with name dest synchronously
  * by reading each file, and writing its contents to the dest file.
@@ -186,8 +199,51 @@ void wait_task(const char *download_dir, Context *context) {
  * @param bytes - The maximum byte size downloaded
  * @param tasks - The tasks needed for the multipart download
  */
-void merge_files(char *src, char *dest, int bytes, int tasks) {
-    assert(0 && "not implemented yet!");
+void merge_files(char *src, char *dest, int bytes, int tasks) 
+{
+    printf("dir = %s\n", src);
+    printf("dir = %s\n", dest);
+    printf("byte = %d\n", bytes);
+    printf("task = %d\n\n", tasks);
+    
+    // char *a = malloc(sizeof(char));
+
+    // sprintf(a, "%d", 300);
+    // printf("%d\n", strlen(a));
+    //char *srcBuff = malloc(sizeof(char) * (strlen(src) + strlen(a)) + 6);
+    char *srcFile = malloc(sizeof(char) * 100);
+    char *destFile = malloc(sizeof(char) * 100);
+    char ch;
+
+    sprintf(destFile, "%s/%s", src, dest);
+    FILE *mergeFile = fopen("download/merge", "w");
+    printf("%s\n", destFile);
+    
+
+    for (int count = 0; count < (bytes*tasks); count += bytes) {
+        sprintf(srcFile, "%s/%d", src, count);
+        printf("%s\n", srcFile);
+
+        FILE *getFile = fopen(srcFile, "r");
+
+        while((ch = fgetc(getFile)) != EOF)
+            fputc(ch, mergeFile);
+
+        // size_t size = file_size(fileno(getFile));  // File -> fd
+        // char *buffer = malloc(size);
+        // size_t fileread = fread(buffer, size, 1, getFile);
+        // fwrite(buffer, size, 1, mergeFile);
+    }
+    puts("");
+
+    // FILE *file = fopen("download/0", "r");
+    // FILE *merge = fopen("download/merge", "w");
+
+    // size_t size = file_size(fileno(file));  // File -> fd
+    // char *buffer = malloc(size);
+    // size_t fileread = fread(buffer, size, 1, file);
+    // fwrite(buffer, size, 1, merge);
+    // read(file, buf, 
 }
 
 

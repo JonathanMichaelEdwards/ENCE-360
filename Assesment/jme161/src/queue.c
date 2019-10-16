@@ -156,13 +156,8 @@ void queue_put(Queue *queue, void *item)
             if (queue->manager.size == 0) {
                 queue->head = queue_;
             }
-        //    printList(queue->head);
         }
         queue->manager.size++;
-
-        // if (item != NULL) printList(queue->head);
-
-        // printf("task: %d\n", *(int*)queue->head->value);
     }
 
     
@@ -190,23 +185,18 @@ void *queue_get(Queue *queue)
     void *item = NULL;
     Queue *temp = NULL;
 
-    // while (1) {
-        if (queue->head != NULL) {   
-            queue->manager.size--;
-            temp = queue->head;
-            queue->head = queue->head->next;
-            if (queue->head == NULL) { 
-                queue->tail = NULL;
-            } 
+    if (queue->head != NULL) {   
+        queue->manager.size--;
+        temp = queue->head;
+        queue->head = queue->head->next;
+        if (queue->head == NULL) { 
+            queue->tail = NULL;
+        } 
 
-            item = temp->value;
-            free(temp);
-
-            // if (item != NULL) printf("item=%d\n", *(int*)item);
-
-            // break;
-        // } 
+        item = temp->value;
+        free(temp);
     }
+    // puts("get");
     
     pthread_mutex_unlock(&queue->manager.lock);
     sem_post(&queue->manager.write);
