@@ -146,12 +146,10 @@ void queue_put(Queue *queue, void *item)
         }
         queue->manager.size++;
     }
-    
     pthread_mutex_unlock(&queue->manager.lock);
     sem_post(&queue->manager.read);
 }
-
-
+    
 /**
  * Get an item from the concurrent queue
  * 
@@ -178,11 +176,9 @@ void *queue_get(Queue *queue)
         if (queue->head == NULL) { 
             queue->tail = NULL;
         } 
-
         item = temp->value;
         free(temp);
     }
-    
     pthread_mutex_unlock(&queue->manager.lock);
     sem_post(&queue->manager.write);
 
