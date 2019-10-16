@@ -194,6 +194,7 @@ int get_num_tasks(char *url, int threads)
     c = strtok(NULL, "\n");
     ret = atoi(c);
 
+    // printf("%f\n", (float)ret / threads);
     max_chunk_size = (int)((float)ret / threads + 0.5);
 
     t1 = 0;

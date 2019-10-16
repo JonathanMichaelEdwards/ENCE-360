@@ -216,23 +216,23 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
     char ch;
 
     sprintf(destFile, "%s/%s", src, dest);
-    FILE *mergeFile = fopen("download/merge", "w");
+    FILE *mergeFile = fopen("download/merge.jpeg", "w");
     printf("%s\n", destFile);
     
-
+    FILE *getFile;
     for (int count = 0; count < (bytes*tasks); count += bytes) {
         sprintf(srcFile, "%s/%d", src, count);
         printf("%s\n", srcFile);
 
-        FILE *getFile = fopen(srcFile, "r");
+        getFile = fopen(srcFile, "r");
 
-        while((ch = fgetc(getFile)) != EOF)
-            fputc(ch, mergeFile);
+        // while((ch = fgetc(getFile)) != EOF)
+        //     fputc(ch, mergeFile);
 
-        // size_t size = file_size(fileno(getFile));  // File -> fd
-        // char *buffer = malloc(size);
-        // size_t fileread = fread(buffer, size, 1, getFile);
-        // fwrite(buffer, size, 1, mergeFile);
+        size_t size = file_size(fileno(getFile));  // File -> fd
+        char *buffer = malloc(size);
+        size_t fileread = fread(buffer, size, 1, getFile);
+        fwrite(buffer, size, 1, mergeFile);
     }
     puts("");
 
@@ -244,6 +244,8 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
     // size_t fileread = fread(buffer, size, 1, file);
     // fwrite(buffer, size, 1, merge);
     // read(file, buf, 
+    fclose(mergeFile);
+    fclose(getFile);
 }
 
 
