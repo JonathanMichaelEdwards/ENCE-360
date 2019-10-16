@@ -9,8 +9,7 @@
 // A structure to represent a queue 
 typedef struct { 
 	int head, tail, size; 
-	int *store; 
-	void **value;
+	void *store; 
 } Queue; 
 
 
@@ -19,9 +18,8 @@ typedef struct {
 Queue *createQueue(int capacity) 
 { 
 	Queue *queue = (Queue*)malloc(sizeof(Queue)); 
-	queue->store = (int*)malloc(sizeof(queue->store) * capacity); 
+	queue->store = malloc(sizeof(queue->store) * capacity); 
     queue->head = queue->tail = queue->size = 0; 
-	queue->value[12] = queue->value;
 
 	return queue; 
 } 
@@ -37,7 +35,7 @@ int isEmpty(Queue *queue) { return (queue->size == 0); }
 
 // Function to add an item to the queue. 
 // It changes tail and size 
-void enqueue(Queue *queue, int item) 
+void enqueue(Queue *queue, void *item) 
 { 
 	if (isFull(queue)) 
 		return; 
@@ -45,7 +43,7 @@ void enqueue(Queue *queue, int item)
 	queue->store[queue->tail++] = item; 
 	queue->size += 1; 
     
-	printf("(+) %d enqueued to queue\n", item); 
+	printf("(+) %d enqueued to queue\n", *(int*)item); 
 } 
 
 
@@ -56,10 +54,10 @@ void dequeue(Queue *queue)
 	if (isEmpty(queue)) 
 		return; 
 
-    int item = queue->store[queue->head++];  
+    void *item = queue->store[queue->head++];  
     queue->size += 1;
 
-	printf("(-) %d dequeued from queue\n", item);
+	printf("(-) %d dequeued from queue\n", *(int*)item);
 } 
 
 
@@ -103,21 +101,19 @@ int main()
 { 
 	Queue *queue = createQueue(CAPACITY); 
 
-	// enqueue(queue, 10); 
-	// enqueue(queue, 20); 
-	// enqueue(queue, 30); 
-	// enqueue(queue, 40); 
-    // dequeue(queue);
-    // enqueue(queue, 100); 
-    // enqueue(queue, 60);
-    // dequeue(queue);
+	enqueue(queue, 10); 
+	enqueue(queue, 20); 
+	enqueue(queue, 30); 
+	enqueue(queue, 40); 
+    dequeue(queue);
+    enqueue(queue, 100); 
+    enqueue(queue, 60);
+    dequeue(queue);
 
-    // printQueue(queue);
+    printQueue(queue);
 
 	// free(queue->store);
 	// free(queue);
-	int a = 1;
-	queue->value[0] = (void*)&a;
 
 
 	exit(EXIT_SUCCESS); 

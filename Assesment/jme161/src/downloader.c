@@ -135,9 +135,7 @@ void free_task(Task *task) {
 void wait_task(const char *download_dir, Context *context) {
     
     char filename[FILE_SIZE], url_file[FILE_SIZE];
-    puts("3");
     Task *task = (Task*)queue_get(context->done);
-    puts("4");
     if (task->result) {
         snprintf(url_file, FILE_SIZE * sizeof(char), "%d", task->min_range);
         size_t len = strlen(url_file);
@@ -241,19 +239,16 @@ int main(int argc, char **argv) {
             queue_put(context->todo, new_task(line, i * bytes, (i+1) * bytes));
         }
         
-        puts("1");
         // Get results back
         while (work > 0) {
-            printf("Work: %d\n", work);
             --work;
             wait_task(download_dir, context);
         }
-        puts("2");
         /* Merge the files -- simple synchronous method
          * Then remove the chunked download files
          * Beware, this is not an efficient method
          */
-        // merge_files(download_dir, line, bytes, num_tasks);
+        merge_files(download_dir, line, bytes, num_tasks);
         // remove_chunk_files(download_dir, bytes, num_tasks);
     }
    

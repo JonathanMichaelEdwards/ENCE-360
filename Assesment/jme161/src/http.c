@@ -82,7 +82,7 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
 
     // Dynamically allocating memory space 
     char *usrPort = (char*)malloc(sizeof(char) * 2 + 1);
-    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + 52));//EMPTY_HEADER_SIZE));
+    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));//EMPTY_HEADER_SIZE));
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE));
     buffer->length = 0;
