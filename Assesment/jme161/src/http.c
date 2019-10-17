@@ -104,13 +104,19 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     if (rc == -1) HANDLE_ERROR("Connect");
 
     // Formatting the header
-    // if (!strcmp(range, "")) {
+    if (!t1) {
+        if (!strcmp(range, "")) {
+            sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);
+        } else {
+            sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);
+        }
+    } else {
+        sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);
+    }
 
-    if (!t1) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
-    else sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
-    // } else {
-        // sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
-    // }
+    // if (!t1) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
+    // else sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
+    
     
     // Write and read N bytes of header data to FD
     write(sockfd, header, strlen(header));
@@ -180,27 +186,22 @@ Buffer *http_url(const char *url, const char *range)
  */
 int get_num_tasks(char *url, int threads) 
 {
-    char *b = malloc(sizeof(char));
-    char *c = malloc(sizeof(char));
-    int ret = 0;
-
     t1 = 1;
 
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer = http_url(url, (char*)BUF_SIZE);
 
-    b = strstr(buffer->data, "Content-Length: ");
-    c = strtok(b, " ");
-    c = strtok(NULL, "\n");
-    ret = atoi(c);
+    printf("%s\n", buffer->data);
 
-    printf("%d\n", ret);
-    max_chunk_size = (int)((float)ret / threads + 0.5) - 1;
-    // max_chunk_size = (int)((float)ret / threads + 0.5)-1;
-    // max_chunk_size = (ret / threads); //- 32;
-    // max_chunk_size = (ret / threads) + (int)((ret % threads)/threads + 0.5);
-    // max_chunk_size = (int)((((float)ret / threads)))-1;//  (ret % threads)));
-    // max_chunk_size = 4089;
+    if (strstr(buffer->data, "Accept-Ranges: bytes") != NULL) {
+        char *b = strstr(buffer->data, "Content-Length: ");
+        char *c = strtok(b, " ");
+        c = strtok(NULL, "\n");
+
+        max_chunk_size = (atoi(c) / threads) + 1;
+    } else {
+        max_chunk_size = 1;
+    }
 
     t1 = 0;
 

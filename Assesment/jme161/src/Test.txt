@@ -20,3 +20,5 @@ make && valgrind --leak-check=full --show-leak-kinds=all ./queue_test
 # Part 3 && 4:
 make && ./downloader small.txt 12 download
 make && ./downloader test.txt 12 download
+make && time downloader large.txt 12 download
+make && bin/time downloader large.txt 12 download

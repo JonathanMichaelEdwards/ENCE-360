@@ -199,40 +199,27 @@ size_t file_size(int fd)
  * @param bytes - The maximum byte size downloaded
  * @param tasks - The tasks needed for the multipart download
  */
-// cat * >> file.jpeg
 void merge_files(char *src, char *dest, int bytes, int tasks) 
 {
     char *srcFile = malloc(sizeof(char) * (strlen(src)) + 6);
-    char *tempDest = malloc(sizeof(char) * 100); //strlen(dest));
     char *temp = malloc(sizeof(char) * 100);
-    char *t = malloc(sizeof(char) * 100);
 
-    memcpy(tempDest, dest, strlen(dest));
-    memcpy(t, dest, strlen(dest));
-    create_directory(strtok(tempDest, "/"));
-
-    // char *a = strtok(dest, "\n");
-    // a = strtok(NULL, "/");
-    // char *ptr = strrchr(dest, '/');
-
-
-    // printf("%s\n", ptr);
-    sprintf(temp, "%s/%s", tempDest,  strrchr(dest+1, '/'));
+    sprintf(temp, "%s%s", src,  strrchr(dest, '/'));
     FILE *mergeFile = fopen(temp, "w");
 
-    FILE *getFile;
     for (int count = 0; count < (bytes*tasks); count += bytes) {
         sprintf(srcFile, "%s/%d", src, count);
 
-        getFile = fopen(srcFile, "r");
+        FILE *getFile = fopen(srcFile, "r");
 
         char *buffer = malloc(sizeof(char) * bytes);
         fread(buffer, bytes, 1, getFile);
         fwrite(buffer, bytes, 1, mergeFile);
+
+        fclose(getFile);
     }
 
-    // fclose(mergeFile);
-    // fclose(getFile);
+    fclose(mergeFile);
 }
 
 
@@ -242,8 +229,14 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
  * @param bytes - The maximum byte size per file. Assumed to be filename
  * @param files - The number of chunked files to remove.
  */
-void remove_chunk_files(char *dir, int bytes, int files) {
-   assert(0 && "not implemented yet!");
+void remove_chunk_files(char *dir, int bytes, int files) 
+{
+    char *temp = malloc(sizeof(char) * 100);
+   
+    for (int count = 0; count < (bytes*files); count += bytes) {
+        sprintf(temp, "%s/%d", dir, count);
+        remove(temp);
+    }
 }
 
 
@@ -294,13 +287,12 @@ int main(int argc, char **argv) {
          * Beware, this is not an efficient method
          */
         merge_files(download_dir, line, bytes, num_tasks);
-        // remove_chunk_files(download_dir, bytes, num_tasks);
+        remove_chunk_files(download_dir, bytes, num_tasks);
     }
    
     //cleanup
     fclose(fp);
     free(line);
-
     free_workers(context);
 
     return 0;
