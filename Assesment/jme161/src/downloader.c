@@ -199,16 +199,26 @@ size_t file_size(int fd)
  * @param bytes - The maximum byte size downloaded
  * @param tasks - The tasks needed for the multipart download
  */
+// cat * >> file.jpeg
 void merge_files(char *src, char *dest, int bytes, int tasks) 
 {
     char *srcFile = malloc(sizeof(char) * (strlen(src)) + 6);
+    char *tempDest = malloc(sizeof(char) * 100); //strlen(dest));
+    char *temp = malloc(sizeof(char) * 100);
+    char *t = malloc(sizeof(char) * 100);
 
-    char *tempDest = malloc(sizeof(char) *  strlen(dest));
     memcpy(tempDest, dest, strlen(dest));
+    memcpy(t, dest, strlen(dest));
     create_directory(strtok(tempDest, "/"));
 
-    printf("%s\n", dest);
-    FILE *mergeFile = fopen(dest, "w");
+    // char *a = strtok(dest, "\n");
+    // a = strtok(NULL, "/");
+    // char *ptr = strrchr(dest, '/');
+
+
+    // printf("%s\n", ptr);
+    sprintf(temp, "%s/%s", tempDest,  strrchr(dest+1, '/'));
+    FILE *mergeFile = fopen(temp, "w");
 
     FILE *getFile;
     for (int count = 0; count < (bytes*tasks); count += bytes) {
@@ -216,14 +226,13 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
 
         getFile = fopen(srcFile, "r");
 
-        size_t size = file_size(fileno(getFile));  // File -> fd
-        char *buffer = malloc(size);
-        fread(buffer, size, 1, getFile);
-        fwrite(buffer, size, 1, mergeFile);
+        char *buffer = malloc(sizeof(char) * bytes);
+        fread(buffer, bytes, 1, getFile);
+        fwrite(buffer, bytes, 1, mergeFile);
     }
 
-    fclose(mergeFile);
-    fclose(getFile);
+    // fclose(mergeFile);
+    // fclose(getFile);
 }
 
 

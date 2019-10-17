@@ -82,7 +82,7 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
 
     // Dynamically allocating memory space 
     char *usrPort = (char*)malloc(sizeof(char) * 2 + 1);
-    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));//EMPTY_HEADER_SIZE));
+    char *header = (char*)malloc(sizeof(char) * 1000);//(strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));//EMPTY_HEADER_SIZE));
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE));
     buffer->length = 0;
@@ -194,12 +194,13 @@ int get_num_tasks(char *url, int threads)
     c = strtok(NULL, "\n");
     ret = atoi(c);
 
-    printf("got=%d\n", (int)(((float)ret / threads) + 0.5 + (ret % threads)));
-    printf("got=%d\n", ret);
-    // printf("%d\n", ret / threads + 0.5);
-    // max_chunk_size = (int)((float)ret / threads + 0.5);
-    max_chunk_size = (ret / threads) + (ret % threads);
-    // max_chunk_size = (int)(((float)ret / threads) + 0.5 + (ret % threads));
+    printf("%d\n", ret);
+    max_chunk_size = (int)((float)ret / threads + 0.5) - 1;
+    // max_chunk_size = (int)((float)ret / threads + 0.5)-1;
+    // max_chunk_size = (ret / threads); //- 32;
+    // max_chunk_size = (ret / threads) + (int)((ret % threads)/threads + 0.5);
+    // max_chunk_size = (int)((((float)ret / threads)))-1;//  (ret % threads)));
+    // max_chunk_size = 4089;
 
     t1 = 0;
 
