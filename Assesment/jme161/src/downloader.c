@@ -201,29 +201,28 @@ size_t file_size(int fd)
  */
 void merge_files(char *src, char *dest, int bytes, int tasks) 
 {
-    char *srcFile = malloc(sizeof(char) * (strlen(src)) + 6);
+    char *srcFile = malloc(sizeof(char) * FILE_SIZE);
+    char *temp = malloc(sizeof(char) * FILE_SIZE);
 
-    char *tempDest = malloc(sizeof(char) *  strlen(dest));
-    memcpy(tempDest, dest, strlen(dest));
-    create_directory(strtok(tempDest, "/"));
+    sprintf(temp, "%s%s", src,  strrchr(dest, '/'));
+    FILE *mergeFile = fopen(temp, "w");
+    char *buffer = malloc(sizeof(char) * bytes);
 
-    printf("%s\n", dest);
-    FILE *mergeFile = fopen(dest, "w");
-
-    FILE *getFile;
     for (int count = 0; count < (bytes*tasks); count += bytes) {
         sprintf(srcFile, "%s/%d", src, count);
 
-        getFile = fopen(srcFile, "r");
+        FILE *getFile = fopen(srcFile, "r");
 
-        size_t size = file_size(fileno(getFile));  // File -> fd
-        char *buffer = malloc(size);
-        fread(buffer, size, 1, getFile);
-        fwrite(buffer, size, 1, mergeFile);
+        size_t read_size = fread(buffer, 1, bytes, getFile);
+        fwrite(buffer, 1, read_size, mergeFile);
+
+        fclose(getFile);
     }
 
+    free(temp);
+    free(buffer);
+    free(srcFile);
     fclose(mergeFile);
-    fclose(getFile);
 }
 
 
@@ -233,8 +232,16 @@ void merge_files(char *src, char *dest, int bytes, int tasks)
  * @param bytes - The maximum byte size per file. Assumed to be filename
  * @param files - The number of chunked files to remove.
  */
-void remove_chunk_files(char *dir, int bytes, int files) {
-   assert(0 && "not implemented yet!");
+void remove_chunk_files(char *dir, int bytes, int files) 
+{
+    char *temp = malloc(sizeof(char) * 100);
+   
+    for (int count = 0; count < (bytes*files); count += bytes) {
+        sprintf(temp, "%s/%d", dir, count);
+        remove(temp);
+    }
+
+    free(temp);
 }
 
 
@@ -268,8 +275,6 @@ int main(int argc, char **argv) {
         num_tasks = get_num_tasks(line, num_workers);
         bytes = get_max_chunk_size();
 
-        // The queue is getting blocked when becomes full!!!
-        // *** have to fix the queue ***
         for (int i  = 0; i < num_tasks; i++) {
             ++work;
             queue_put(context->todo, new_task(line, i * bytes, (i+1) * bytes));
@@ -281,17 +286,16 @@ int main(int argc, char **argv) {
             wait_task(download_dir, context);
         }
         /* Merge the files -- simple synchronous method
-         * Then remove the chunked download files
+         * Then reinstead move the chunked download files
          * Beware, this is not an efficient method
          */
         merge_files(download_dir, line, bytes, num_tasks);
-        // remove_chunk_files(download_dir, bytes, num_tasks);
+        remove_chunk_files(download_dir, bytes, num_tasks);
     }
    
     //cleanup
     fclose(fp);
     free(line);
-
     free_workers(context);
 
     return 0;

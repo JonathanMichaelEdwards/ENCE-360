@@ -146,6 +146,7 @@ void queue_put(Queue *queue, void *item)
         }
         queue->manager.size++;
     }
+    
     pthread_mutex_unlock(&queue->manager.lock);
     sem_post(&queue->manager.read);
 }

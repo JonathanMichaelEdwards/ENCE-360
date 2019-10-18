@@ -1,11 +1,11 @@
 # Part 1:
 make && ./http_test www.example.com index.html
 make && ./test_download.sh www.example.com/index.html
-                                                                  # for valgrind ...
-make && ./http_test www.thomas-bayer.com sqlrest/CUSTOMER/3/              # Gives me 'Conditional jump or move depends on uninitialised value(s)'
+                                                
+make && ./http_test www.thomas-bayer.com sqlrest/CUSTOMER/3/              
 make && ./test_download.sh www.thomas-bayer.com/sqlrest/CUSTOMER/3/
 
-make && ./http_test static.canterbury.ac.nz web/graphics/blacklogo.png    # no errorr
+make && ./http_test static.canterbury.ac.nz web/graphics/blacklogo.png
 make && ./test_download.sh static.canterbury.ac.nz/web/graphics/blacklogo.png
 
 make && ./http_test www.cosc.canterbury.ac.nz research/reports/PhdTheses/2015/phd_1501.pdf
@@ -20,3 +20,5 @@ make && valgrind --leak-check=full --show-leak-kinds=all ./queue_test
 # Part 3 && 4:
 make && ./downloader small.txt 12 download
 make && ./downloader test.txt 12 download
+make && time downloader large.txt 12 download
+make && time bin/downloader large.txt 12 download
