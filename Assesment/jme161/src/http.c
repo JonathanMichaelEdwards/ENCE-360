@@ -13,24 +13,29 @@
 #define HANDLE_ERROR(msg) \
         do { puts("Error: "msg); exit(EXIT_FAILURE); } while(0)
 
-// #define HEADER(header, PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=0-500\r\nUser-Agent: getter\r\n\r\n", PAGE, HOST);
-// #define HEADER(header, PAGE, HOST) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n", PAGE, HOST);
 
-
-#define EMPTY_HEADER_SIZE 70  // Give it a bit more extra space
+#define EMPTY_HEADER_SIZE 100
 #define BUF_SIZE 1024
 
 
-/**
- * Close the socket and free memory.
- */
-void clear(int sockfd, char *usrPort, char *header, struct addrinfo *addr)
+int t1 = 0;
+
+char *formatHeader(char *host, char *page, const char *range)
 {
-    
-    free(usrPort);
-    free(header);
-    freeaddrinfo(addr);
-    close(sockfd);
+    char *header = (char*)malloc(sizeof(char) * (strlen(page) + strlen(host)) + EMPTY_HEADER_SIZE);
+
+    // Formatting the header
+    if (!t1) {
+        if (!strcmp(range, "")) {
+            sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);
+        } else {
+            sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);
+        }
+    } else {
+        sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);
+    }
+
+    return header;
 }
 
 
@@ -60,6 +65,19 @@ void readBytes(int sockfd, Buffer *buffer)
 
 
 /**
+ * Close the socket and free memory.
+ */
+void clear(int sockfd, char *usrPort, char *header, struct addrinfo *addr)
+{
+    
+    free(usrPort);
+    free(header);
+    freeaddrinfo(addr);
+    close(sockfd);
+}
+
+
+/**
  * Perform an HTTP 1.0 query to a given host and page and port number.
  * host is a hostname and page is a path on the remote server. The query
  * will attempt to retrrecv(s, chunk, BUF_SIZE, 0)ieve content in the given byte range.
@@ -72,8 +90,6 @@ void readBytes(int sockfd, Buffer *buffer)
  * @return Buffer - Pointer to a buffer holding response data from query
  *                  NULL is returned on failure.
  */
-
-int t1 = 0;
 Buffer *http_query(char *host, char *page, const char *range, int port) 
 {
     // Initialize Connector's and Server's address info   
@@ -82,7 +98,6 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
 
     // Dynamically allocating memory space 
     char *usrPort = (char*)malloc(sizeof(char) * 2 + 1);
-    char *header = (char*)malloc(sizeof(char) * 1000);//(strlen(page) + strlen(host) + EMPTY_HEADER_SIZE));//EMPTY_HEADER_SIZE));
     Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
     buffer->data = (char*)malloc(sizeof(char) * (BUF_SIZE));
     buffer->length = 0;
@@ -97,26 +112,14 @@ Buffer *http_query(char *host, char *page, const char *range, int port)
     if (sockfd == -1) HANDLE_ERROR("Socket");
     addrInfo.ai_family = AF_INET;
     addrInfo.ai_socktype = SOCK_STREAM;
-    getaddrinfo(host, usrPort, &addrInfo, &addr);
+    int ga = getaddrinfo(host, usrPort, &addrInfo, &addr);
+    if (ga == -1) HANDLE_ERROR("Connect");
 
     // Connect to the host;
     int rc = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
     if (rc == -1) HANDLE_ERROR("Connect");
 
-    // Formatting the header
-    if (!t1) {
-        if (!strcmp(range, "")) {
-            sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);
-        } else {
-            sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);
-        }
-    } else {
-        sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);
-    }
-
-    // if (!t1) sprintf(header, "GET /%s HTTP/1.0\r\nHost: %s\r\nRange: bytes=%s\r\nUser-Agent: getter\r\n\r\n", page, host, range);  // part 1 & 4
-    // else sprintf(header, "HEAD /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: getter\r\n\r\n", page, host);   // part 3
-    
+    char *header = formatHeader(host, page, range);
     
     // Write and read N bytes of header data to FD
     write(sockfd, header, strlen(header));
@@ -188,22 +191,28 @@ int get_num_tasks(char *url, int threads)
 {
     t1 = 1;
 
-    Buffer *buffer = (Buffer*)malloc(sizeof(Buffer));
-    buffer = http_url(url, (char*)BUF_SIZE);
+    Buffer *buffer = http_url(url, (char*)BUF_SIZE);
+    char *rangeBuff = (char*)malloc(sizeof(char) + BUF_SIZE);
 
-    printf("%s\n", buffer->data);
+    memcpy(rangeBuff, buffer->data, BUF_SIZE);
+    char *b = strstr(buffer->data, "Content-Length: ");
+    char *c = strtok(b, " ");
+    c = strtok(NULL, "\n");
+    int byteSize = atoi(c);
 
-    if (strstr(buffer->data, "Accept-Ranges: bytes") != NULL) {
-        char *b = strstr(buffer->data, "Content-Length: ");
-        char *c = strtok(b, " ");
-        c = strtok(NULL, "\n");
-
-        max_chunk_size = (atoi(c) / threads) + 1;
+    
+    if (strstr(rangeBuff, "Accept-Ranges: bytes") != NULL) {
+        max_chunk_size = (byteSize / threads);
     } else {
-        max_chunk_size = 1;
+        max_chunk_size = byteSize;
+        threads = 1;
     }
+    
 
     t1 = 0;
+
+    free(rangeBuff);
+    buffer_free(buffer);
 
     return threads;
 }
